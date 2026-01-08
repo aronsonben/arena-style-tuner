@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Are.na Style Synthesizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              arena: {
+                gray: '#F7F7F7',
+                border: '#E7E7E7',
+                text: '#1A1A1A',
+                green: '#2D9F61',
+              }
+            },
+            animation: {
+              'mesh': 'mesh 15s ease infinite',
+            },
+            keyframes: {
+              mesh: {
+                '0%, 100%': { 'background-position': '0% 50%' },
+                '50%': { 'background-position': '100% 50%' },
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      .animate-mesh {
+        /* Palette: Light Gray -> Light Blue -> Medium Blue -> Dark Blue -> Dark Gray */
+        background: linear-gradient(-45deg, #cbd5e1, #93c5fd, #3b82f6, #1e3a8a, #374151);
+        background-size: 400% 400%;
+      }
+      .dark .animate-mesh {
+        /* Dark mode palette: Darker variations of Gray and Blue */
+        background: linear-gradient(-45deg, #1f2937, #1e3a8a, #172554, #1e40af, #0f172a);
+        background-size: 400% 400%;
+      }
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      .no-scrollbar::-webkit-scrollbar {
+          display: none;
+      }
+      /* Hide scrollbar for IE, Edge and Firefox */
+      .no-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-white text-arena-text font-sans antialiased selection:bg-arena-green selection:text-white transition-colors duration-300">
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "name": "Are.na Style Synthesizer",
+  "description": "Generate new images based on the visual aesthetic of any Are.na channel using Gemini 3 Pro.",
+  "requestFramePermissions": []
+}
