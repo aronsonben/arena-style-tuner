@@ -7,7 +7,7 @@ COPY . .
 RUN npm run build
 
 # Runtime stage
-FROM node:20-alpin
+FROM node:20-alpine
 WORKDIR /app
 RUN npm install -g serve
 COPY --from=builder /app/dist ./dist
