@@ -8,12 +8,6 @@ steps:
     - '-c'
     - 'docker pull us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest || exit 0'
 
-  
-# Step 1: Change dir & run node
-- name: 'gcr.io/cloud-builders/npm'
-  entrypoint: 'node'
-  args: ['--version']
-
 # Step 2: Build the image using the cached layers and tag it with COMMIT_SHA and 'latest'.
 # The '--cache-from' argument tells Docker to use the pulled 'latest' image as a cache source.
 - name: 'gcr.io/cloud-builders/docker'
@@ -22,8 +16,6 @@ steps:
     - '-t'
     - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:$COMMIT_SHA'
     - '-t' # Add a 'latest' tag for subsequent caching
-    - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest'
-    - '--cache-from'
     - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest'
     - '.'
 
