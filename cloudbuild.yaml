@@ -48,6 +48,8 @@ images:
   # Both tags should be listed here so Cloud Build knows to track them
   - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:$COMMIT_SHA'
   - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest'
+options:
+  logging: CLOUD_LOGGING_ONLY
 
 # Optional: Add a timeout for the entire build
 timeout: '10m' # e.g., 10 minutes
