@@ -1,10 +1,19 @@
 steps:
-# Step 0: Pull the previous image to use as a cache.
+# Step 1: Pull the previous image to use as a cache.
+# This step attempts to pull an image tagged 'latest'. If it doesn't exist (e.g., first build),
+# the '|| exit 0' ensures the build doesn't fail.
 - name: 'gcr.io/cloud-builders/docker'
-  args: 
-    - 'pull'
-    - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest0'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - 'docker pull us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest || exit 0'
+
   
+# Step 1: Change dir & run node
+- name: 'gcr.io/cloud-builders/npm'
+  entrypoint: 'node'
+  args: ['--version']
+
 # Step 2: Build the image using the cached layers and tag it with COMMIT_SHA and 'latest'.
 # The '--cache-from' argument tells Docker to use the pulled 'latest' image as a cache source.
 - name: 'gcr.io/cloud-builders/docker'
@@ -15,7 +24,7 @@ steps:
     - '-t' # Add a 'latest' tag for subsequent caching
     - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest'
     - '--cache-from'
-    - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest0'
+    - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest'
     - '.'
 
 # Step 3: Push the image tagged with COMMIT_SHA to Artifact Registry.
