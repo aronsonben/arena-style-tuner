@@ -3,7 +3,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: 
     - 'pull'
-    - 'us-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest'
+    - 'us-west1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest || exit 0'
   
 # Step 2: Build the image using the cached layers and tag it with COMMIT_SHA and 'latest'.
 # The '--cache-from' argument tells Docker to use the pulled 'latest' image as a cache source.
