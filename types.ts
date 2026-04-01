@@ -1,10 +1,11 @@
 
 export interface ArenaBlock {
   id: number;
+  type: string;
   title: string;
   image: {
-    display: {
-      url: string;
+    medium: {
+      src: string;
     };
     thumb: {
       url: string;

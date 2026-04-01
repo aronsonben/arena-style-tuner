@@ -126,7 +126,7 @@ const App: React.FC = () => {
       
       const processed: ProcessedImage[] = contents.map((block) => ({
         id: block.id,
-        url: block.image?.display.url || '',
+        url: block.image.medium.src || '',  // arbitrarily picked medium from v3 api
         selected: false
       })).filter(img => img.url !== '');
 
@@ -151,7 +151,7 @@ const App: React.FC = () => {
       
       const processed: ProcessedImage[] = contents.map((block) => ({
         id: block.id,
-        url: block.image?.display.url || '',
+        url: block.image.medium.src || '',
         selected: false
       })).filter(img => img.url !== '');
 

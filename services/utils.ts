@@ -38,7 +38,8 @@ export const extractChannelSlug = (input: string): string | null => {
  */
 export const urlToBase64 = async (url: string): Promise<{ base64: string; mimeType: string }> => {
   // Use a CORS proxy to fetch the image data
-  const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+  // const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+  const proxyUrl = url;
   
   const response = await fetch(proxyUrl);
   if (!response.ok) {
