@@ -37,8 +37,6 @@ steps:
     - 'are-na-style-synthesizer'
     - '--image'
     - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/are-na-style-synthesizer:$COMMIT_SHA'
-    - '--source'
-    - 'NONE'
     - '--region'
     - 'us-west1'
     - '--port'
