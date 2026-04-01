@@ -6,7 +6,7 @@ steps:
   entrypoint: 'bash'
   args:
     - '-c'
-    - 'docker pull us-central1-docker.pkg.dev/are-na-style-synthesizer/cloud-run-source-deploy/are-na-style-synthesizer-image:latest || exit 0'
+    - 'docker pull us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest || exit 0'
 
 # Step 2: Build the image using the cached layers and tag it with COMMIT_SHA and 'latest'.
 # The '--cache-from' argument tells Docker to use the pulled 'latest' image as a cache source.
@@ -14,21 +14,21 @@ steps:
   args:
     - 'build'
     - '-t'
-    - 'us-central1-docker.pkg.dev/are-na-style-synthesizer/cloud-run-source-deploy/are-na-style-synthesizer-image:$COMMIT_SHA'
+    - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:$COMMIT_SHA'
     - '-t' # Add a 'latest' tag for subsequent caching
-    - 'us-central1-docker.pkg.dev/are-na-style-synthesizer/cloud-run-source-deploy/are-na-style-synthesizer-image:latest'
+    - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest'
     - '--cache-from'
-    - 'us-central1-docker.pkg.dev/are-na-style-synthesizer/cloud-run-source-deploy/are-na-style-synthesizer-image:latest'
+    - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest'
     - '.'
 
 # Step 3: Push the image tagged with COMMIT_SHA to Artifact Registry.
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'us-central1-docker.pkg.dev/are-na-style-synthesizer/cloud-run-source-deploy/are-na-style-synthesizer-image:$COMMIT_SHA']
+  args: ['push', 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:$COMMIT_SHA']
 
 # Step 4: Push the image tagged with 'latest' to Artifact Registry.
 # This ensures the 'latest' tag is always updated for future cache-from operations.
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'us-central1-docker.pkg.dev/are-na-style-synthesizer/cloud-run-source-deploy/are-na-style-synthesizer-image:latest']
+  args: ['push', 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest']
 
 # Step 5: Deploy the image to Cloud Run.
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -38,7 +38,7 @@ steps:
     - 'deploy'
     - 'are-na-style-synthesizer'
     - '--image'
-    - 'us-central1-docker.pkg.dev/are-na-style-synthesizer/cloud-run-source-deploy/are-na-style-synthesizer-image:$COMMIT_SHA'
+    - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:$COMMIT_SHA'
     - '--region'
     - 'us-central1'
     - '--port'
@@ -46,8 +46,8 @@ steps:
 
 images:
   # Both tags should be listed here so Cloud Build knows to track them
-  - 'us-central1-docker.pkg.dev/are-na-style-synthesizer/cloud-run-source-deploy/are-na-style-synthesizer-image:$COMMIT_SHA'
-  - 'us-central1-docker.pkg.dev/are-na-style-synthesizer/cloud-run-source-deploy/are-na-style-synthesizer-image:latest'
+  - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:$COMMIT_SHA'
+  - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:latest'
 logsBucket: 'gs://are-na-style-synthesizer_cloudbuild'
 
 # Optional: Add a timeout for the entire build
