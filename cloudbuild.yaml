@@ -40,7 +40,7 @@ steps:
     - '--image'
     - 'us-west1-docker.pkg.dev/gen-lang-client-0447363070/cloud-run-source-deploy/arena-style-tuner/are-na-style-synthesizer:$COMMIT_SHA'
     - '--region'
-    - 'us-central1'
+    - 'us-west1'
     - '--port'
     - '3000'
 
