@@ -275,20 +275,20 @@ const App: React.FC = () => {
     return <FriendGate onUnlock={handleUnlock} isError={authError} />;
   }
 
-  if (!hasApiKey) {
-    return (
-      <div className={`min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300 ${isDark ? 'bg-neutral-950 text-white' : 'bg-white text-arena-text'} text-center animate-in fade-in`}>
-        <div className="max-w-md space-y-6">
-          <div className={`w-16 h-16 ${isDark ? 'bg-neutral-900' : 'bg-neutral-100'} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
-            <Key className="w-8 h-8 text-neutral-400" />
-          </div>
-          <h1 className="text-3xl font-light">Connect Google AI</h1>
-          <p className="text-neutral-500">To generate high-quality images with Gemini 3 Pro, you need to connect your API key.</p>
-          <button onClick={handleConnectApiKey} className={`w-full py-4 rounded-xl font-medium transition-all ${isDark ? 'bg-white text-black hover:bg-neutral-200' : 'bg-arena-text text-white hover:bg-neutral-800'}`}>Connect Key</button>
-        </div>
-      </div>
-    );
-  }
+  // if (!hasApiKey) {
+  //   return (
+  //     <div className={`min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300 ${isDark ? 'bg-neutral-950 text-white' : 'bg-white text-arena-text'} text-center animate-in fade-in`}>
+  //       <div className="max-w-md space-y-6">
+  //         <div className={`w-16 h-16 ${isDark ? 'bg-neutral-900' : 'bg-neutral-100'} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
+  //           <Key className="w-8 h-8 text-neutral-400" />
+  //         </div>
+  //         <h1 className="text-3xl font-light">Connect Google AI</h1>
+  //         <p className="text-neutral-500">To generate high-quality images with Gemini 3 Pro, you need to connect your API key.</p>
+  //         <button onClick={handleConnectApiKey} className={`w-full py-4 rounded-xl font-medium transition-all ${isDark ? 'bg-white text-black hover:bg-neutral-200' : 'bg-arena-text text-white hover:bg-neutral-800'}`}>Connect Key</button>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-neutral-950 text-white' : 'bg-white text-arena-text'}`}>
