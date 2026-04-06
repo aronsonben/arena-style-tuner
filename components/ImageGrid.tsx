@@ -25,7 +25,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({
 
   if (images.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-neutral-400">
+      <div className="flex flex-col items-center justify-center py-20 text-arena-text-muted dark:text-arena-dark-text-muted">
         <ImageIcon className="w-12 h-12 mb-4 opacity-20" />
         <p>No images found in this channel.</p>
       </div>
@@ -35,13 +35,13 @@ const ImageGrid: React.FC<ImageGridProps> = ({
   return (
     <div className="space-y-4">
       {/* Sticky Selection Status Bar with pop of color */}
-      <div className="flex items-center justify-between sticky top-[64px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md z-30 py-4 px-4 -mx-4 border-y border-arena-border dark:border-indigo-500/20 shadow-sm transition-all duration-300">
+      <div className="flex items-center justify-between sticky top-[64px] bg-arena-cream/95 dark:bg-arena-dark-surface/95 backdrop-blur-md z-30 py-4 px-4 -mx-4 border-y border-arena-border dark:border-arena-dark-border shadow-sm transition-all duration-300">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-mono text-neutral-500 dark:text-indigo-400/80 uppercase tracking-[0.15em] font-semibold">
+          <span className="text-xs font-mono text-arena-text-muted dark:text-arena-dark-text uppercase tracking-[0.15em] font-semibold">
             Style References
           </span>
-          <div className="hidden sm:block h-4 w-px bg-neutral-200 dark:bg-neutral-800" />
-          <span className="hidden sm:inline text-[10px] font-mono text-neutral-400 dark:text-neutral-500 uppercase">
+          <div className="hidden sm:block h-4 w-px bg-arena-border dark:bg-arena-dark-border" />
+          <span className="hidden sm:inline text-[10px] font-mono text-arena-brown dark:text-arena-dark-text-muted uppercase">
             Max {selectionLimit} images
           </span>
         </div>
@@ -53,7 +53,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({
                 e.stopPropagation();
                 onClearSelection();
               }}
-              className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-neutral-400 hover:text-red-500 transition-colors py-1.5 px-3 rounded-lg hover:bg-red-500/5"
+              className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-arena-text-muted dark:text-arena-dark-text-muted hover:text-red-500 transition-colors py-1.5 px-3 rounded-lg hover:bg-red-500/5"
              >
                <Trash2 className="w-3 h-3" />
                <span className="hidden sm:inline">Clear selection</span>
@@ -63,7 +63,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({
            <div className={`text-xs font-bold px-4 py-1.5 rounded-full transition-all flex items-center gap-2 shadow-sm
              ${selectedCount >= selectionLimit 
                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800' 
-               : 'bg-arena-text dark:bg-indigo-600 dark:text-white text-white shadow-indigo-500/10'}
+               : 'bg-arena-charcoal dark:bg-arena-dark-text text-arena-cream dark:text-arena-dark-bg'}
            `}>
              <span className="font-mono">{selectedCount}</span>
              <span className="opacity-40">/</span>
@@ -81,8 +81,8 @@ const ImageGrid: React.FC<ImageGridProps> = ({
             className={`
               relative group aspect-square cursor-pointer overflow-hidden rounded-md border transition-all duration-200
               ${img.selected 
-                ? 'border-arena-green ring-2 ring-arena-green ring-offset-2 dark:ring-offset-neutral-950' 
-                : 'border-arena-border dark:border-neutral-800 hover:border-arena-text dark:hover:border-neutral-400'
+                ? 'border-arena-green ring-2 ring-arena-green ring-offset-2 dark:ring-offset-arena-dark-bg' 
+                : 'border-arena-border dark:border-arena-dark-border hover:border-arena-charcoal dark:hover:border-arena-dark-text'}
               }
             `}
           >
@@ -113,11 +113,11 @@ const ImageGrid: React.FC<ImageGridProps> = ({
           <button
             onClick={onLoadMore}
             disabled={isLoadingMore}
-            className="flex items-center gap-2 px-8 py-3 border border-arena-border dark:border-neutral-800 rounded-xl font-mono text-sm hover:border-arena-text dark:hover:border-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+            className="flex items-center gap-2 px-8 py-3 border border-arena-border dark:border-arena-dark-border rounded-xl font-mono text-sm hover:border-arena-charcoal dark:hover:border-arena-dark-text hover:bg-arena-beige dark:hover:bg-arena-dark-surface transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
           >
             {isLoadingMore ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-neutral-400" />
+                <Loader2 className="w-4 h-4 animate-spin text-arena-text-muted dark:text-arena-dark-text-muted" />
                 <span>Loading contents...</span>
               </>
             ) : (

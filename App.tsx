@@ -30,8 +30,8 @@ const App: React.FC = () => {
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
-  const [isDark, setIsDark] = useState(true); 
-  const [quotaInfo, setQuotaInfo] = useState({ requests: 10, tokens: 50000 });
+  const [isDark, setIsDark] = useState(false); 
+  const [quotaInfo, setQuotaInfo] = useState({ remaining: 10 });
   const [authError, setAuthError] = useState(false);
   
   // Pagination State
@@ -50,18 +50,14 @@ const App: React.FC = () => {
 
     if (isDark) {
       document.documentElement.classList.add('dark');
-      document.body.classList.add('bg-neutral-950', 'text-white');
-      document.body.classList.remove('bg-white', 'text-arena-text');
     } else {
       document.documentElement.classList.remove('dark');
-      document.body.classList.add('bg-white', 'text-arena-text');
-      document.body.classList.remove('bg-neutral-950', 'text-white');
     }
   }, [isDark]);
 
   const updateQuotaDisplay = () => {
-    const { remainingRequests, remainingTokens } = RateLimitService.checkLimit();
-    setQuotaInfo({ requests: remainingRequests, tokens: remainingTokens });
+    const { remaining } = RateLimitService.checkLimit();
+    setQuotaInfo({ remaining });
   };
 
   useEffect(() => {
@@ -126,7 +122,7 @@ const App: React.FC = () => {
       
       const processed: ProcessedImage[] = contents.map((block) => ({
         id: block.id,
-        url: block.image.medium.src || '',  // arbitrarily picked medium from v3 api
+        url: block.image?.medium.src || '',  // arbitrarily picked medium from v3 api
         selected: false
       })).filter(img => img.url !== '');
 
@@ -151,7 +147,7 @@ const App: React.FC = () => {
       
       const processed: ProcessedImage[] = contents.map((block) => ({
         id: block.id,
-        url: block.image.medium.src || '',
+        url: block.image?.medium.src || '',
         selected: false
       })).filter(img => img.url !== '');
 
@@ -221,7 +217,7 @@ const App: React.FC = () => {
       setState(AppState.GENERATING);
       const result = await generateStyledImage(prompt, validImages);
       
-      RateLimitService.recordUsage(result.promptTokens);
+      RateLimitService.recordUsage();
       updateQuotaDisplay();
       
       setGeneratedImage(result.imageUrl);
@@ -291,29 +287,30 @@ const App: React.FC = () => {
   // }
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-neutral-950 text-white' : 'bg-white text-arena-text'}`}>
-      <header className={`fixed top-0 left-0 right-0 h-16 backdrop-blur-md border-b z-40 flex items-center px-6 justify-between transition-colors duration-300 ${isDark ? 'bg-neutral-950/80 border-neutral-800' : 'bg-white/80 border-arena-border'}`}>
-        <div className={`text-lg font-bold tracking-tight cursor-pointer transition-colors ${isDark ? 'text-white' : 'text-arena-text'}`} onClick={handleReset}>
-          Are.na <span className="font-normal text-neutral-400">Synthesizer</span>
+    <div className={`min-h-screen transition-colors duration-300 bg-arena-cream text-arena-charcoal dark:bg-arena-dark-bg dark:text-arena-dark-text`}>
+      <header className={`fixed top-0 left-0 right-0 h-16 backdrop-blur-md border-b z-40 flex items-center px-6 justify-between transition-colors duration-300 bg-arena-cream/80 border-arena-border dark:bg-arena-dark-bg/80 dark:border-arena-dark-border`}>
+        <div className="text-lg font-bold tracking-tight cursor-pointer transition-colors text-arena-charcoal dark:text-arena-dark-text" onClick={handleReset}>
+          Are.na <span className="font-normal text-arena-text-muted dark:text-arena-dark-text-muted">Synthesizer</span>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-2 mb-0.5">
+              <span title={hasApiKey ? 'API key loaded' : 'No API key'} className={`text-[10px] font-mono flex items-center gap-1 ${hasApiKey ? 'text-arena-green' : 'text-red-400'}`}>
+                {hasApiKey ? '✓' : '✗'} API KEY
+              </span>
               <Shield className="w-3 h-3 text-arena-green" />
-              {channel && <div className="text-xs font-mono text-neutral-500 truncate max-w-[150px] sm:max-w-[200px]">{channel.title}</div>}
+              {channel && <div className="text-xs font-mono truncate max-w-[150px] sm:max-w-[200px] text-arena-text-muted dark:text-arena-dark-text-muted">{channel.title}</div>}
             </div>
-            <div className="text-[10px] font-mono text-neutral-400 opacity-70 flex items-center gap-3">
-              <span title="Daily Requests Remaining">{quotaInfo.requests} REQS</span>
-              <span className="h-2 w-px bg-neutral-700"></span>
-              <span title="Daily Token Quota Remaining">{(quotaInfo.tokens / 1000).toFixed(1)}K TOKENS</span>
-              <span className="h-2 w-px bg-neutral-700"></span>
+            <div className="text-[10px] font-mono opacity-70 flex items-center gap-3 text-arena-brown dark:text-arena-dark-text-muted">
+              <span title="Generations Remaining">{quotaInfo.remaining} GENS LEFT</span>
+              <span className="h-2 w-px bg-arena-border dark:bg-arena-dark-border"></span>
               <button 
                 onClick={() => setIsDark(!isDark)}
                 className="hover:text-arena-green transition-colors flex items-center gap-1"
                 title="Toggle Theme"
               >
-                {isDark ? <Sun className="w-3 h-3 text-white" /> : <Moon className="w-3 h-3" />}
-                <span className={`uppercase ${isDark ? 'text-white' : ''}`}>{isDark ? 'Light' : 'Dark'}</span>
+                {isDark ? <Sun className="w-3 h-3" /> : <Moon className="w-3 h-3" />}
+                <span className="uppercase text-arena-charcoal dark:text-arena-dark-text">{isDark ? 'Light' : 'Dark'}</span>
               </button>
             </div>
           </div>
@@ -322,10 +319,10 @@ const App: React.FC = () => {
 
       <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto min-h-screen pb-32">
         {error && (
-          <div className={`mb-8 p-4 rounded-lg flex items-center gap-3 text-sm border ${isDark ? 'bg-red-950/30 text-red-400 border-red-900/50' : 'bg-red-50 text-red-600 border-red-100'}`}>
+          <div className="mb-8 p-4 rounded-lg flex items-center gap-3 text-sm border bg-red-50/80 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/50">
             <AlertCircle className="w-5 h-5" />
             <p>{error}</p>
-            <button onClick={() => setError(null)} className="ml-auto hover:underline">Dismiss</button>
+            <button onClick={() => setError(null)} className="ml-auto hover:underline font-medium">Dismiss</button>
           </div>
         )}
 
@@ -338,8 +335,8 @@ const App: React.FC = () => {
         {(state === AppState.SELECTING || state === AppState.PROCESSING_REFERENCES || state === AppState.GENERATING || state === AppState.COMPLETE) && (
           <div className="animate-in fade-in duration-500">
             <div className="mb-8 space-y-2">
-               <h2 className="text-2xl font-light">{channel?.title}</h2>
-               {channel?.metadata?.description && <p className="text-neutral-500 max-w-2xl text-sm leading-relaxed">{channel.metadata.description}</p>}
+               <h2 className="text-2xl font-light text-arena-charcoal dark:text-arena-dark-text">{channel?.title}</h2>
+               {channel?.metadata?.description && <p className="max-w-2xl text-sm leading-relaxed text-arena-text-muted dark:text-arena-dark-text-muted">{channel.metadata.description}</p>}
             </div>
 
             <ImageGrid 

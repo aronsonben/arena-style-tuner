@@ -1,5 +1,54 @@
 @import "tailwindcss";
 
-#app {
-  background-color: brown;
+/* Tailwind v4: class-based dark mode variant */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@font-face {
+  font-family: 'windowsregular';
+  src: url('./assets/fonts/windows_regular-webfont.woff2') format('woff2'),
+       url('./assets/fonts/windows_regular-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@theme {
+  /* Fonts */
+  --font-sans: 'Ubuntu Mono', 'Courier New', Courier, monospace;
+  --font-mono: 'Ubuntu Mono', 'Courier New', Courier, monospace;
+
+  /* Light mode palette (from stylez.css) */
+  --color-arena-cream: #FCFAF0;
+  --color-arena-charcoal: #253031;
+  --color-arena-beige: #F8F5E8;
+  --color-arena-border: #D4C5A9;
+  --color-arena-border-light: #E6DCC6;
+  --color-arena-text-muted: #6B5B47;
+  --color-arena-text-dark: #8B7355;
+  --color-arena-tan: #B8A47E;
+  --color-arena-brown: #827549;
+  --color-arena-green: #2D9F61;
+
+  /* Dark mode palette */
+  --color-arena-dark-bg: #1a1f20;
+  --color-arena-dark-surface: #252b2c;
+  --color-arena-dark-surface-elevated: #2f3536;
+  --color-arena-dark-border: #3a4041;
+  --color-arena-dark-text: #e8e4d8;
+  --color-arena-dark-text-muted: #a89e8a;
+
+  /* Animations */
+  --animate-mesh: mesh 15s ease infinite;
+
+  @keyframes mesh {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+}
+
+html {
+  background-color: #FCFAF0;
+}
+
+html.dark {
+  background-color: #1a1f20;
 }

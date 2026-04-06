@@ -35,10 +35,10 @@ const ChannelInput: React.FC<ChannelInputProps> = ({ onLoad, isLoading }) => {
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6 animate-fade-in-up">
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-light tracking-tight text-arena-text dark:text-white transition-colors">
+        <h1 className="text-4xl font-light tracking-tight text-arena-charcoal dark:text-arena-dark-text transition-colors">
           Are.na Style Synthesizer
         </h1>
-        <p className="text-neutral-500 font-mono text-sm">
+        <p className="text-arena-text-muted dark:text-arena-dark-text-muted font-mono text-sm">
           Fine-tune Gemini on your favorite channels.
         </p>
       </div>
@@ -51,13 +51,13 @@ const ChannelInput: React.FC<ChannelInputProps> = ({ onLoad, isLoading }) => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="https://are.na/username/channel-name"
-              className="w-full px-6 py-4 bg-white dark:bg-neutral-900 border border-arena-border dark:border-neutral-800 rounded-xl text-lg outline-none focus:ring-2 focus:ring-arena-text/10 focus:border-arena-text dark:focus:border-white transition-all placeholder:text-neutral-300 dark:placeholder:text-gray-500 font-mono text-black dark:text-white"
+              className="w-full px-6 py-4 bg-arena-beige dark:bg-arena-dark-surface border border-arena-border dark:border-arena-dark-border rounded-xl text-lg outline-none focus:ring-2 focus:ring-arena-charcoal/10 focus:border-arena-charcoal dark:focus:border-arena-dark-text transition-all placeholder:text-arena-tan dark:placeholder:text-arena-dark-text-muted/50 font-mono text-arena-charcoal dark:text-arena-dark-text"
               disabled={isLoading}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="absolute right-2 p-2 bg-arena-text dark:bg-white text-white dark:text-black rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
+              className="absolute right-2 p-2 bg-arena-charcoal dark:bg-arena-dark-text text-arena-cream dark:text-arena-dark-bg rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-arena-text-dark dark:hover:bg-arena-beige transition-colors"
             >
               {isLoading ? (
                 <Loader2 className="w-6 h-6 animate-spin" />
@@ -71,7 +71,7 @@ const ChannelInput: React.FC<ChannelInputProps> = ({ onLoad, isLoading }) => {
         <div className="flex flex-col items-center gap-3">
           <button 
             onClick={() => setShowRecs(!showRecs)}
-            className="flex items-center gap-2 text-xs font-mono text-neutral-400 hover:text-arena-green transition-colors group"
+            className="flex items-center gap-2 text-xs font-mono text-arena-text-muted dark:text-arena-dark-text-muted hover:text-arena-green transition-colors group"
           >
             <Paintbrush className="w-3 h-3 group-hover:rotate-12 transition-transform" />
             <span>Need inspiration? Try these channels</span>
@@ -86,7 +86,7 @@ const ChannelInput: React.FC<ChannelInputProps> = ({ onLoad, isLoading }) => {
                   disabled={isLoading}
                   className={`
                     text-left px-4 py-2 text-[10px] font-mono border rounded-lg transition-all
-                    bg-neutral-50 dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800
+                    bg-arena-beige dark:bg-arena-dark-surface border-arena-border-light dark:border-arena-dark-border
                     hover:border-arena-green hover:text-arena-green dark:hover:border-arena-green
                     truncate max-w-full animate-in fade-in slide-in-from-top-1
                   `}
@@ -99,7 +99,7 @@ const ChannelInput: React.FC<ChannelInputProps> = ({ onLoad, isLoading }) => {
           )}
         </div>
 
-        <div className="flex justify-center gap-4 text-xs text-neutral-400 font-mono">
+        <div className="flex justify-center gap-4 text-xs text-arena-text-muted dark:text-arena-dark-text-muted font-mono">
           <span>Public channels only</span>
           <span>•</span>
           <span>Images only</span>

@@ -1,0 +1,1251 @@
+@font-face {
+  font-family: 'windowsregular';
+  src: url('./assets/fonts/windows_regular-webfont.woff2') format('woff2'),
+       url('./assets/fonts/windows_regular-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+.ubuntu-mono-regular {
+  font-family: "Ubuntu Mono", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.ubuntu-mono-bold {
+  font-family: "Ubuntu Mono", serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.ubuntu-mono-regular-italic {
+  font-family: "Ubuntu Mono", serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.ubuntu-mono-bold-italic {
+  font-family: "Ubuntu Mono", serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+/** begin styles **/
+
+html {
+  background-color: #FCFAF0;
+}
+h1, h2, h3, h4, h5, h6, p, a {
+  margin: 0;
+  padding: 0;
+  color: #253031;
+}
+body {
+  margin: 0 auto;
+  padding: 0;
+  max-width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  font-family: "Ubuntu Mono", "Courier New", Courier, monospace;
+  line-height: 1.6;
+}
+.container {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  max-width: 100vw;
+}
+.container-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* **** sidebar **** */
+.sidebar {
+  width: min-content;
+  padding: 10px;
+  border-right: 1px solid #253031;
+}
+
+.logo {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 3px double #253031;
+}
+
+.logo a {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.logo h1 {
+  font-size: 1.2rem;
+  text-wrap: nowrap;
+}
+.logo img {
+  max-width: 70px;
+  /* max-height: 38px; */
+  margin-right: 5px;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wip a {
+  text-decoration: line-through;
+  cursor: default;
+}
+
+.wip-text {
+  color: #A9A9A9;
+  font-size: 0.9rem;
+  margin-left: 5px;
+}
+
+/* **** main content **** */
+.main-content {
+  width: 100%;
+}
+.main-content-microblog {
+  padding: 10px;
+  max-width: 400px;
+}
+
+.bio-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 0;
+}
+
+.bio-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.icon-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 0;
+}
+
+.icon-link {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.concourse-icon {
+  max-width: 38px;
+  max-height: 38px;
+  margin-right: 5px;
+}
+
+.concourse-icon-xs {
+  max-width: 25px;
+  max-height: 25px;
+  position: relative;
+  z-index: 1;
+}
+
+.concourse-icon-lg {
+  max-width: 100px;
+  max-height: 100px;
+  position: relative;
+  z-index: 1;
+}
+
+.concourse-icon-xl {
+  max-width: 200px;
+  max-height: 200px;
+  position: relative;
+  z-index: 2;
+}
+
+footer {
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px 0;
+  font-size: 0.8rem;
+}
+
+/** **** pages **** **/
+
+/** about **/
+
+.about {
+  display: block;
+}
+
+.ben-pic-header {
+  display: flex;
+  align-items: center; 
+  justify-content: flex-start; 
+  gap: 2rem;
+  font-size: 1rem;
+}
+
+.about .ben-pic {
+  max-width: 150px;
+  max-height: 150px;
+  margin: 15px 0;
+  border-radius: 999px;
+  /* box-shadow: 5px 4px 0px 4px rgb(65 58 40) */
+}
+
+
+
+/** blog **/
+
+.blog {
+  background-color: pink;
+}
+
+/** portfolio **/
+
+.portfolio-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  margin: 0 10px 40px 10px;
+}
+
+.portfolio-intro {
+  max-width: 600px;
+}
+
+.portfolio-intro h2 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+.portfolio-intro p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+  margin: 0 10px;
+}
+
+.portfolio-item {
+  border: 1px solid #253031;
+  padding: 20px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.portfolio-item:hover {
+  box-shadow: 0 4px 12px rgba(37, 48, 49, 0.1);
+  transform: translateY(-2px);
+}
+
+.portfolio-item-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.portfolio-icon {
+  max-width: 50px;
+  max-height: 50px;
+  flex-shrink: 0;
+}
+
+.portfolio-item h3 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.portfolio-item p {
+  flex-grow: 1;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 15px 0;
+  padding: 0;
+}
+
+.tech-tags li {
+  background-color: #f0f0f0;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #253031;
+}
+
+.project-link {
+  align-self: flex-start;
+  color: #253031;
+  text-decoration: none;
+  font-weight: bold;
+  margin-top: auto;
+  transition: all 0.2s ease;
+}
+
+.project-link:hover {
+  opacity: 0.7;
+}
+
+.portfolio-cta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  margin-top: 10px;
+  padding: 10px 20px;
+  border-top: 1px solid #253031;
+}
+
+.portfolio-cta p {
+  font-size: 0.9rem;
+  color: #827549;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 8px 24px;
+  background-color: #253031;
+  color: #FCFAF0;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.cta-button:hover {
+  background-color: #3a4546;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(37, 48, 49, 0.2);
+}
+
+/** portfolio **/
+
+.sitemap {
+  display: flex;
+  margin: 8px 10px;
+  margin-bottom: 50px;
+}
+
+.sitemap-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 30px;
+  width: 100%;
+}
+
+.sitemap-item {
+  border: 1px solid #253031;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  padding: 10px 20px;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+}
+
+.sitemap-icon {
+  max-width: 35px;
+  max-height: 35px;
+  flex-shrink: 0;
+}
+
+.sitemap-item:hover {
+  box-shadow: 0 4px 12px rgba(37, 48, 49, 0.1);
+  transform: translateY(-2px);
+}
+
+/** Mobile handling specifically for sitemap. Maybe shouldn't do it this way but whatever (3/30/26) **/
+@media screen and (max-width: 540px) {
+  .sitemap-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    margin-bottom: 50px;
+    width: 100%;
+  }
+  .sitemap-item {
+    letter-spacing: normal;
+    padding: 5px 15px;
+  }
+}
+.post-portfolio-grid {
+  margin: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/** work in progress **/
+
+.body-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 10px;
+}
+.body-content img {
+  width: 50%;
+  height: 50%;
+}
+.body-content ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+.body-content ul li {
+  font-size: 1rem;
+}
+
+/** microblog **/
+
+.microblog {
+  padding: 0;
+}
+
+.microblog-form-container {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.microblog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.form-input, .form-textarea {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #0d1117;
+  color: #c9d1d9;
+  resize: vertical;
+}
+
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 1px #58a6ff;
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+  color: #8b949e;
+}
+
+.char-count {
+  font-size: 0.75rem;
+  color: #666;
+  text-align: right;
+  margin-top: 5px;
+}
+
+.form-button {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+  padding: 12px 24px;
+  background: #238636;
+  color: white;
+  border: 1px solid #2ea043;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.2s;
+}
+
+.form-button:hover:not(:disabled) {
+  background: #2ea043;
+  border-color: #46954a;
+}
+
+.form-button:disabled {
+  background: #484f58;
+  border-color: #484f58;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.microblog-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.microblog-post {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+
+.microblog-post:hover {
+  border-color: #444c56;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 15px;
+}
+
+.post-subject {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #f0f6fc;
+  flex: 1;
+}
+
+.post-date {
+  font-size: 0.8rem;
+  color: #8b949e;
+  white-space: nowrap;
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+.post-content {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #c9d1d9;
+  white-space: pre-wrap;
+}
+
+.loading, .error, .no-posts {
+  text-align: center;
+  padding: 40px;
+  color: #8b949e;
+  font-style: italic;
+}
+
+.error {
+  color: #ff6b6b;
+}
+
+/* Mobile responsiveness for microblog */
+@media screen and (max-width: 540px) {
+  .microblog-form-container {
+    padding: 15px;
+  }
+  
+  .post-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .post-date {
+    align-self: flex-start;
+  }
+  
+  .form-input, .form-textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* ****** */
+
+.blog-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 1rem;
+}
+
+.blog-content div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 600px;
+  padding: 20px;
+  text-align: left;
+  line-height: 2;
+}
+
+.proverb-aesthetic {
+  font-size: 0.75rem;
+  font-style: italic;
+  letter-spacing: 0.2rem;
+  margin: 20px 0;
+}
+
+/* Forum/Message Board Styles */
+.forum-container {
+  width: 100%;
+  max-width: 600px;
+}
+
+.microblog-form {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid #D4C5A9;
+  border-radius: 5px;
+  background-color: #F8F5E8;
+}
+
+.microblog-form form {
+  margin: 0;
+}
+
+.microblog-form input[type="text"],
+.microblog-form textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #D4C5A9;
+  border-radius: 3px;
+  font-family: 'windowsregular', "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  background-color: #FCFAF0;
+  color: #253031;
+}
+
+.microblog-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.microblog-form button {
+  background-color: #253031;
+  color: #FCFAF0;
+  border: 1px solid #253031;
+  padding: 10px 20px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'windowsregular', "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.microblog-form button:hover {
+  background-color: #3A4041;
+  border-color: #3A4041;
+}
+
+.microblogs-container {
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid #D4C5A9;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #FCFAF0;
+}
+
+.microblog-card {
+  border: 1px solid #E6DCC6;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #F8F5E8;
+  box-shadow: 0 1px 3px rgba(37, 48, 49, 0.1);
+}
+
+.microblog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #E6DCC6;
+}
+
+.microblog-author {
+  font-weight: bold;
+  color: #253031;
+  font-size: 0.95rem;
+}
+
+.microblog-timestamp {
+  color: #6B5B47;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.microblog-content {
+  line-height: 1.5;
+  font-size: 0.9rem;
+  word-wrap: break-word;
+  color: #253031;
+}
+
+.no-microblogs {
+  text-align: center;
+  color: #6B5B47;
+  font-style: italic;
+  padding: 30px 0;
+}
+
+.status-message {
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 3px;
+  font-size: 0.9rem;
+}
+
+.status-message.success {
+  background-color: #E8F5E8;
+  border: 1px solid #C3E6CB;
+  color: #2F5233;
+}
+
+.status-message.error {
+  background-color: #F8E8E8;
+  border: 1px solid #E6C3C3;
+  color: #5A2F2F;
+}
+
+/* Commit Board Styles */
+.commit-calendar-container {
+  margin: 30px 0;
+  padding: 20px;
+  background-color: #F8F5E8;
+  border: 1px solid #D4C5A9;
+  border-radius: 5px;
+}
+
+.commit-calendar {
+  margin: 20px 0;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: 40px repeat(52, 12px);
+  grid-template-rows: 20px repeat(7, 12px);
+  gap: 3px;
+  font-size: 0.7rem;
+  color: #6B5B47;
+}
+
+.month-labels {
+  display: contents;
+}
+
+.month-labels span {
+  font-size: 0.7rem;
+  color: #6B5B47;
+  text-align: left;
+  padding-left: 2px;
+}
+
+.day-label {
+  font-size: 0.7rem;
+  color: #6B5B47;
+  text-align: right;
+  padding-right: 5px;
+  line-height: 12px;
+}
+
+.calendar-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid #E6DCC6;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.calendar-cell:hover {
+  border-color: #253031;
+  transform: scale(1.3);
+}
+
+/* GitHub-style intensity levels */
+.calendar-cell.level-0 {
+  background-color: #FCFAF0;
+}
+
+.calendar-cell.level-1 {
+  background-color: #D4C5A9;
+}
+
+.calendar-cell.level-2 {
+  background-color: #B8A47E;
+}
+
+.calendar-cell.level-3 {
+  background-color: #8B7355;
+}
+
+.calendar-cell.level-4 {
+  background-color: #6B5B47;
+}
+
+.calendar-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 10px;
+  gap: 3px;
+}
+
+.legend-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid #E6DCC6;
+}
+
+.legend-box.level-0 {
+  background-color: #FCFAF0;
+}
+
+.legend-box.level-1 {
+  background-color: #D4C5A9;
+}
+
+.legend-box.level-2 {
+  background-color: #B8A47E;
+}
+
+.legend-box.level-3 {
+  background-color: #8B7355;
+}
+
+.legend-box.level-4 {
+  background-color: #6B5B47;
+}
+
+/* Commit Form Styles */
+.commit-form {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid #D4C5A9;
+  border-radius: 5px;
+  background-color: #F8F5E8;
+}
+
+.commit-form form {
+  margin: 0;
+}
+
+.commit-form label {
+  display: block;
+  position: relative;
+}
+
+.commit-form input[type="text"],
+.commit-form input[type="password"],
+.commit-form textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #D4C5A9;
+  border-radius: 3px;
+  font-family: 'windowsregular', "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  background-color: #FCFAF0;
+  color: #253031;
+}
+
+.commit-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.char-counter {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  font-size: 0.75rem;
+  color: #6B5B47;
+  background-color: #F8F5E8;
+  padding: 2px 5px;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.commit-form button {
+  background-color: #253031;
+  color: #FCFAF0;
+  border: 1px solid #253031;
+  padding: 10px 20px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'windowsregular', "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.commit-form button:hover {
+  background-color: #3A4041;
+  border-color: #3A4041;
+}
+
+/* Commits Display */
+.commits-container {
+  max-height: 600px;
+  overflow-y: auto;
+  border: 1px solid #D4C5A9;
+  border-radius: 5px;
+  padding: 15px;
+  background-color: #FCFAF0;
+}
+
+.date-group {
+  margin-bottom: 25px;
+}
+
+.date-header {
+  font-size: 0.85rem;
+  color: #6B5B47;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #E6DCC6;
+  font-weight: normal;
+}
+
+.commit-card {
+  border: 1px solid #E6DCC6;
+  border-radius: 5px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background-color: #F8F5E8;
+  box-shadow: 0 1px 3px rgba(37, 48, 49, 0.1);
+}
+
+.commit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+}
+
+.commit-timestamp {
+  color: #6B5B47;
+  font-style: italic;
+}
+
+.commit-char-count {
+  color: #8B7355;
+  font-size: 0.7rem;
+}
+
+.commit-content {
+  line-height: 1.5;
+  font-size: 0.9rem;
+  word-wrap: break-word;
+  color: #253031;
+}
+
+.no-messages {
+  text-align: center;
+  color: #6B5B47;
+  font-style: italic;
+  padding: 30px 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .commit-calendar-container {
+    padding: 15px;
+    overflow-x: auto;
+  }
+  
+  .calendar-grid {
+    grid-template-columns: 35px repeat(52, 10px);
+    grid-template-rows: 18px repeat(7, 10px);
+    gap: 2px;
+  }
+  
+  .calendar-cell,
+  .legend-box {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .month-labels span,
+  .day-label {
+    font-size: 0.65rem;
+  }
+  
+  .commits-container {
+    max-height: 400px;
+  }
+}
+
+/* RevenueSpot Project Page Styles */
+.revenuespot-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.revenuespot-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.revenuespot-nav {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.revenuespot-nav a {
+  font-size: 0.9rem;
+  font-style: italic;
+  text-decoration: underline;
+  color: #253031;
+  transition: opacity 0.2s;
+}
+
+.revenuespot-nav a:hover {
+  opacity: 0.7;
+}
+
+.revenuespot-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.revenuespot-title h2 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.revenuespot-title p {
+  font-size: 1rem;
+  margin: 0;
+  color: #666;
+}
+
+.revenuespot-video {
+  max-width: 100%;
+  width: 600px;
+  height: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin: 2rem auto;
+  display: block;
+}
+
+.revenuespot-content {
+  line-height: 1.8;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.revenuespot-github {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.revenuespot-github a {
+  color: #253031;
+  text-decoration: none;
+  font-style: italic;
+  transition: opacity 0.2s;
+}
+
+.revenuespot-github a:hover {
+  opacity: 0.7;
+}
+
+/* Mobile Styles */
+@media screen and (max-width: 768px) {
+  .revenuespot-container {
+    padding: 15px;
+  }
+  
+  .revenuespot-title {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .revenuespot-title h2 {
+    font-size: 1.5rem;
+  }
+  
+  .revenuespot-title p {
+    font-size: 0.9rem;
+  }
+  
+  .revenuespot-video {
+    width: 100%;
+    max-width: 400px;
+    margin: 1.5rem auto;
+  }
+  
+  .revenuespot-content {
+    padding: 0 10px;
+  }
+  
+  .concourse-icon {
+    max-width: 28px;
+    max-height: 28px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .revenuespot-title h2 {
+    font-size: 1.25rem;
+  }
+  
+  .revenuespot-title p {
+    font-size: 0.8rem;
+  }
+  
+  .revenuespot-video {
+    max-width: 300px;
+    margin: 1rem auto;
+  }
+  
+  .revenuespot-content {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+}
+
+@media screen and (max-width: 540px) {
+
+  /* **** sidebar **** */
+  .sidebar {
+    width: 15%;
+    padding: 10px 0;
+    border-right: 1px solid #253031;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0rem;
+  }
+
+  .sidebar .logo {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 0;
+    width: 100%;
+  }
+
+  .sidebar .logo a {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+  }
+  .sidebar .logo h1 {
+    font-size: 1.4rem;
+  }
+  .sidebar .logo img {
+    max-width: 38px;
+    max-height: 38px;
+    margin-right: 5px;
+  }
+
+  .sidebar ul {
+    list-style-type: none;
+    padding: 5px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Hide sidebar link text on mobile, show only icons */
+  .sidebar a {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.5rem;
+    gap: 0;
+  }
+  .sidebar .logo a h1 {
+    font-size: 0;
+  }
+  .sidebar ul li a img,
+  .sidebar ul li a .concourse-icon-xs {
+    font-size: initial;
+    margin-right: 0;
+    vertical-align: middle;
+    display: inline;
+  }
+  .sidebar ul li span {
+    display: inline-flex;
+    text-align: center;
+    align-content: center;
+    flex-direction: column;
+  }
+  .sidebar ul li a::after {
+    content: none;
+  }
+
+  .concourse-icon-xs {
+    max-width: none;
+    max-height: none;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /** main content **/
+  .bio-header {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  /** portfolio grid responsive **/
+  .portfolio-grid {
+    grid-template-columns: 1fr;
+  }
+}

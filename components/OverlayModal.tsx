@@ -1,23 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Download, X, AlertCircle, RotateCcw, Loader2 } from 'lucide-react';
-import WaitingGames from './WaitingGames';
 
 export type ModalMode = 'RESULT' | 'PROCESSING' | 'ERROR';
 
 const PROCESSING_MESSAGES = [
-  "Harvesting aesthetic artifacts...",
-  "De-noising the channel signal...",
-  "Warming up artistic intuition...",
-  "Synthesizing visual syntax...",
-  "Calibrating creative compass...",
-  "Converting vibes to variables...",
-  "Consulting the muse...",
-  "Indexing reference textures...",
-  "Drafting neural moodboards...",
-  "Applying digital varnish...",
-  "Extracting visual DNA...",
-  "Translating pixels to poetry..."
+  "Processing...",
 ];
 
 interface OverlayModalProps {
@@ -71,19 +59,19 @@ const OverlayModal: React.FC<OverlayModalProps> = ({
 
   return (
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-200 ${
-      isProcessing ? 'bg-slate-200/80 dark:bg-slate-950/90' : 'bg-white/95 dark:bg-neutral-950/95'
+      isProcessing ? 'bg-arena-beige/80 dark:bg-arena-dark-bg/90' : 'bg-arena-cream/95 dark:bg-arena-dark-bg/95'
     }`}>
       <div className={`relative w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border transition-all ${
         isProcessing 
-          ? 'bg-white dark:bg-neutral-900 border-slate-300 dark:border-slate-800' 
-          : 'bg-white dark:bg-neutral-900 border-arena-border dark:border-neutral-800'
+          ? 'bg-arena-beige dark:bg-arena-dark-surface border-arena-border-light dark:border-arena-dark-border' 
+          : 'bg-arena-beige dark:bg-arena-dark-surface border-arena-border dark:border-arena-dark-border'
       }`}>
         
         {/* Header */}
         <div className={`flex items-center justify-between p-4 border-b transition-colors ${
           isProcessing 
-            ? 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800' 
-            : 'bg-white dark:bg-neutral-900 border-arena-border dark:border-neutral-800'
+            ? 'bg-arena-cream dark:bg-arena-dark-bg border-arena-border dark:border-arena-dark-border' 
+            : 'bg-arena-cream dark:bg-arena-dark-bg border-arena-border dark:border-arena-dark-border'
         }`}>
           <h3 className={`font-mono text-xs uppercase tracking-widest truncate max-w-[75%] ${headerClass}`}>
             {headerTitle}
@@ -92,7 +80,7 @@ const OverlayModal: React.FC<OverlayModalProps> = ({
             onClick={onClose}
             disabled={isProcessing}
             className={`p-2 rounded-full transition-colors ${
-              isProcessing ? 'opacity-10 cursor-not-allowed' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400'
+              isProcessing ? 'opacity-10 cursor-not-allowed' : 'hover:bg-arena-border-light dark:hover:bg-arena-dark-surface-elevated text-arena-text-muted dark:text-arena-dark-text-muted'
             }`}
           >
             <X className="w-5 h-5" />
@@ -101,14 +89,11 @@ const OverlayModal: React.FC<OverlayModalProps> = ({
 
         {/* Content Area */}
         <div className={`flex-1 flex flex-col items-center justify-center transition-all overflow-hidden ${
-          isProcessing ? 'm-8 p-8 min-h-[50vh] rounded-xl animate-mesh relative' : 'p-4 bg-neutral-50 dark:bg-neutral-950'
+          isProcessing ? 'm-8 p-8 min-h-[50vh] rounded-xl animate-mesh relative' : 'p-4 bg-arena-cream dark:bg-arena-dark-bg'
         }`}>
           
           {isProcessing && (
             <>
-              {/* Interactive Mini-Games */}
-              {/* <WaitingGames /> */}
-
               {/* Noise overlay for processing mode */}
               <div className="absolute inset-0 opacity-[0.15] pointer-events-none mix-blend-overlay z-0" 
                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} 
@@ -142,8 +127,8 @@ const OverlayModal: React.FC<OverlayModalProps> = ({
                 <AlertCircle className="w-8 h-8" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-xl font-medium dark:text-white">Something went wrong</h2>
-                <p className="text-neutral-500 dark:text-neutral-400 text-sm max-w-sm leading-relaxed">
+                <h2 className="text-xl font-medium text-arena-charcoal dark:text-arena-dark-text">Something went wrong</h2>
+                <p className="text-arena-text-muted dark:text-arena-dark-text-muted text-sm max-w-sm leading-relaxed">
                   {errorMessage || "The synthesis process was interrupted. This can happen due to complex reference images or safety filters."}
                 </p>
               </div>
@@ -161,15 +146,15 @@ const OverlayModal: React.FC<OverlayModalProps> = ({
 
         {/* Footer */}
         <div className={`p-6 border-t flex gap-4 transition-colors ${
-          isProcessing ? 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800' : 'bg-white dark:bg-neutral-900 border-arena-border dark:border-neutral-800'
+          isProcessing ? 'bg-arena-cream dark:bg-arena-dark-bg border-arena-border dark:border-arena-dark-border' : 'bg-arena-cream dark:bg-arena-dark-bg border-arena-border dark:border-arena-dark-border'
         }`}>
           {isProcessing ? (
             <>
-              <button disabled className="flex-1 flex items-center justify-center gap-2 bg-slate-200/50 dark:bg-slate-800 text-slate-400 py-3 rounded-xl font-medium cursor-not-allowed">
+              <button disabled className="flex-1 flex items-center justify-center gap-2 bg-arena-border-light dark:bg-arena-dark-border text-arena-text-muted dark:text-arena-dark-text-muted/50 py-3 rounded-xl font-medium cursor-not-allowed">
                 <Loader2 className="w-5 h-5 animate-spin" />
                 Processing...
               </button>
-              <button disabled className="px-6 py-3 border border-slate-200 dark:border-slate-800 rounded-xl font-medium text-slate-300 dark:text-slate-600 cursor-not-allowed">
+              <button disabled className="px-6 py-3 border border-arena-border dark:border-arena-dark-border rounded-xl font-medium text-arena-tan dark:text-arena-dark-text-muted/50 cursor-not-allowed">
                 Wait
               </button>
             </>
@@ -177,14 +162,14 @@ const OverlayModal: React.FC<OverlayModalProps> = ({
             <>
               <button
                 onClick={onRetry}
-                className="flex-1 flex items-center justify-center gap-2 bg-arena-text dark:bg-white text-white dark:text-black py-3 rounded-xl font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors shadow-lg"
+                className="flex-1 flex items-center justify-center gap-2 bg-arena-charcoal dark:bg-arena-dark-text text-arena-cream dark:text-arena-dark-bg py-3 rounded-xl font-medium hover:bg-arena-text-dark dark:hover:bg-arena-beige transition-colors shadow-lg"
               >
                 <RotateCcw className="w-5 h-5" />
                 Try Again
               </button>
               <button
                 onClick={onClose}
-                className="px-6 py-3 border border-arena-border dark:border-neutral-800 rounded-xl font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 transition-colors"
+                className="px-6 py-3 border border-arena-border dark:border-arena-dark-border rounded-xl font-medium hover:bg-arena-border-light dark:hover:bg-arena-dark-surface-elevated text-arena-text-muted dark:text-arena-dark-text-muted transition-colors"
               >
                 Dismiss
               </button>
@@ -193,14 +178,14 @@ const OverlayModal: React.FC<OverlayModalProps> = ({
             <>
               <button
                 onClick={onDownload}
-                className="flex-1 flex items-center justify-center gap-2 bg-arena-text dark:bg-white text-white dark:text-black py-3 rounded-xl font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors shadow-lg"
+                className="flex-1 flex items-center justify-center gap-2 bg-arena-charcoal dark:bg-arena-dark-text text-arena-cream dark:text-arena-dark-bg py-3 rounded-xl font-medium hover:bg-arena-text-dark dark:hover:bg-arena-beige transition-colors shadow-lg"
               >
                 <Download className="w-5 h-5" />
                 Download Image
               </button>
               <button
                 onClick={onClose}
-                className="px-6 py-3 border border-arena-border dark:border-neutral-800 rounded-xl font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 transition-colors"
+                className="px-6 py-3 border border-arena-border dark:border-arena-dark-border rounded-xl font-medium hover:bg-arena-border-light dark:hover:bg-arena-dark-surface-elevated text-arena-text-muted dark:text-arena-dark-text-muted transition-colors"
               >
                 Try Again
               </button>
