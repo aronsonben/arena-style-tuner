@@ -16,7 +16,8 @@ import ImageGrid from './components/ImageGrid';
 import Controls from './components/Controls';
 import OverlayModal, { ModalMode } from './components/OverlayModal';
 import FriendGate from './components/FriendGate';
-import { AlertCircle, Key, Moon, Sun, Shield } from 'lucide-react';
+import ApiKeyModal from './components/ApiKeyModal';
+import { AlertCircle, Moon, Sun, Shield } from 'lucide-react';
 
 const SELECTION_LIMIT = 10;
 // In a real prod environment, this would be validated on a backend.
@@ -31,7 +32,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false); 
-  const [quotaInfo, setQuotaInfo] = useState({ remaining: 10 });
+  const [quotaInfo, setQuotaInfo] = useState({ remaining: 5 });
   const [authError, setAuthError] = useState(false);
   
   // Pagination State
@@ -39,7 +40,10 @@ const App: React.FC = () => {
   const [hasMore, setHasMore] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const [hasApiKey, setHasApiKey] = useState(!!process.env.API_KEY);
+  // const [hasApiKey, setHasApiKey] = useState(!!process.env.API_KEY);
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [userApiKey, setUserApiKey] = useState<string | null>(null);
 
   useEffect(() => {
     // Check for existing session
@@ -55,13 +59,23 @@ const App: React.FC = () => {
     }
   }, [isDark]);
 
-  const updateQuotaDisplay = () => {
-    const { remaining } = RateLimitService.checkLimit();
+  const updateQuotaDisplay = (hasUserKey: boolean) => {
+    const { remaining } = RateLimitService.checkLimit(hasUserKey);
     setQuotaInfo({ remaining });
   };
 
   useEffect(() => {
-    updateQuotaDisplay();
+    // Restore a previously saved key from sessionStorage.
+    // sessionStorage is origin-scoped, survives refresh, and is cleared when the tab closes.
+    const savedKey = sessionStorage.getItem('arena_user_api_key');
+    if (savedKey) {
+      setUserApiKey(savedKey);
+      setHasApiKey(true);
+      updateQuotaDisplay(true);
+      return; // key already loaded — skip the modal
+    }
+
+    updateQuotaDisplay(false);
 
     const checkApiKey = async () => {
       try {
@@ -69,11 +83,16 @@ const App: React.FC = () => {
         if (win.aistudio && win.aistudio.hasSelectedApiKey) {
           const hasKey = await win.aistudio.hasSelectedApiKey();
           setHasApiKey(hasKey);
+          if (!hasKey) setShowApiKeyModal(true);
         } else if (process.env.API_KEY) {
-          setHasApiKey(true);
+          // setHasApiKey(true);
+          setShowApiKeyModal(true);
+        } else {
+          setShowApiKeyModal(true);
         }
       } catch (e) {
         console.error("Error checking API key status", e);
+        setShowApiKeyModal(true);
       }
     };
     checkApiKey();
@@ -105,6 +124,23 @@ const App: React.FC = () => {
       console.error("Error opening key selector", e);
       setError("Failed to open API key selector.");
     }
+  };
+
+  const handleManualApiKey = (key: string) => {
+    setUserApiKey(key);
+    setHasApiKey(true);
+    setShowApiKeyModal(false);
+    updateQuotaDisplay(true);
+    // Persist for the duration of this browser session only
+    sessionStorage.setItem('arena_user_api_key', key);
+  };
+
+  const handleDisconnectApiKey = () => {
+    setUserApiKey(null);
+    setHasApiKey(false);
+    updateQuotaDisplay(false);
+    sessionStorage.removeItem('arena_user_api_key');
+    setShowApiKeyModal(true);
   };
 
   const handleLoadChannel = async (url: string) => {
@@ -188,7 +224,7 @@ const App: React.FC = () => {
   const handleGenerate = async (prompt: string) => {
     setError(null);
     setGenError(null);
-    const limit = RateLimitService.checkLimit();
+    const limit = RateLimitService.checkLimit(hasApiKey);
     if (!limit.allowed) {
       setError(limit.reason || "Quota limit reached.");
       return;
@@ -215,10 +251,10 @@ const App: React.FC = () => {
       if (validImages.length === 0) throw new Error("Could not process reference images.");
 
       setState(AppState.GENERATING);
-      const result = await generateStyledImage(prompt, validImages);
+      const result = await generateStyledImage(prompt, validImages, userApiKey ?? undefined);
       
-      RateLimitService.recordUsage();
-      updateQuotaDisplay();
+      RateLimitService.recordUsage(hasApiKey);
+      updateQuotaDisplay(hasApiKey);
       
       setGeneratedImage(result.imageUrl);
       setState(AppState.COMPLETE);
@@ -271,21 +307,6 @@ const App: React.FC = () => {
     return <FriendGate onUnlock={handleUnlock} isError={authError} />;
   }
 
-  // if (!hasApiKey) {
-  //   return (
-  //     <div className={`min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300 ${isDark ? 'bg-neutral-950 text-white' : 'bg-white text-arena-text'} text-center animate-in fade-in`}>
-  //       <div className="max-w-md space-y-6">
-  //         <div className={`w-16 h-16 ${isDark ? 'bg-neutral-900' : 'bg-neutral-100'} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
-  //           <Key className="w-8 h-8 text-neutral-400" />
-  //         </div>
-  //         <h1 className="text-3xl font-light">Connect Google AI</h1>
-  //         <p className="text-neutral-500">To generate high-quality images with Gemini 3 Pro, you need to connect your API key.</p>
-  //         <button onClick={handleConnectApiKey} className={`w-full py-4 rounded-xl font-medium transition-all ${isDark ? 'bg-white text-black hover:bg-neutral-200' : 'bg-arena-text text-white hover:bg-neutral-800'}`}>Connect Key</button>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className={`min-h-screen transition-colors duration-300 bg-arena-cream text-arena-charcoal dark:bg-arena-dark-bg dark:text-arena-dark-text`}>
       <header className={`fixed top-0 left-0 right-0 h-16 backdrop-blur-md border-b z-40 flex items-center px-6 justify-between transition-colors duration-300 bg-arena-cream/80 border-arena-border dark:bg-arena-dark-bg/80 dark:border-arena-dark-border`}>
@@ -295,11 +316,26 @@ const App: React.FC = () => {
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-2 mb-0.5">
-              <span title={hasApiKey ? 'API key loaded' : 'No API key'} className={`text-[10px] font-mono flex items-center gap-1 ${hasApiKey ? 'text-arena-green' : 'text-red-400'}`}>
-                {hasApiKey ? '✓' : '✗'} API KEY
-              </span>
+              {hasApiKey ? (
+                <button
+                  onClick={() => setShowApiKeyModal(true)}
+                  title="Edit API key"
+                  className="text-[10px] font-mono flex items-center gap-1 text-arena-green hover:text-arena-tan transition-colors cursor-pointer group"
+                >
+                  <span className="group-hover:hidden">✓ API KEY</span>
+                  <span className="hidden group-hover:inline">EDIT API KEY</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowApiKeyModal(true)}
+                  title="Add API key"
+                  className="text-[10px] font-mono flex items-center gap-1 text-red-400 hover:text-arena-green transition-colors cursor-pointer"
+                >
+                  ✗ API KEY
+                </button>
+              )}
               <Shield className="w-3 h-3 text-arena-green" />
-              {channel && <div className="text-xs font-mono truncate max-w-[150px] sm:max-w-[200px] text-arena-text-muted dark:text-arena-dark-text-muted">{channel.title}</div>}
+              {channel && <div className="text-xs font-mono truncate max-w-37.5 sm:max-w-50 text-arena-text-muted dark:text-arena-dark-text-muted">{channel.title}</div>}
             </div>
             <div className="text-[10px] font-mono opacity-70 flex items-center gap-3 text-arena-brown dark:text-arena-dark-text-muted">
               <span title="Generations Remaining">{quotaInfo.remaining} GENS LEFT</span>
@@ -374,6 +410,13 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+
+      <ApiKeyModal
+        isOpen={showApiKeyModal}
+        onConnect={handleManualApiKey}
+        onDismiss={() => setShowApiKeyModal(false)}
+        onDisconnect={hasApiKey ? handleDisconnectApiKey : undefined}
+      />
     </div>
   );
 };

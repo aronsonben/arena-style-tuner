@@ -14,16 +14,20 @@ export interface GenerationResult {
 
 /**
  * Generates a new image that synthesizes the stylistic "DNA" of reference images.
+ * apiKey: use the user's own key if provided, otherwise fall back to the
+ * shared key from process.env.API_KEY (.env.local GEMINI_API_KEY).
  */
 export const generateStyledImage = async (
   prompt: string,
-  referenceImages: ProcessedImage[]
+  referenceImages: ProcessedImage[],
+  apiKey?: string
 ): Promise<GenerationResult> => {
-  if (!process.env.API_KEY) {
-    throw new Error("API Key not found. Please select an API key first.");
+  const key = apiKey || process.env.API_KEY;
+  if (!key) {
+    throw new Error("API Key not found. Please add an API key first.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: key });
   const parts: any[] = [];
 
   // Add reference images
