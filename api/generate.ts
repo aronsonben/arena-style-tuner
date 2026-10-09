@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
-import { perIpLimiter, globalLimiter, GLOBAL_KEY, getClientIp, IS_DEV, PER_IP_DAILY_LIMIT } from './_lib/limiter';
+import { perIpLimiter, globalLimiter, GLOBAL_KEY, getClientIp, IS_DEV, PER_IP_DAILY_LIMIT } from './_lib/limiter.js';
 
 export const config = { maxDuration: 60 };
 
