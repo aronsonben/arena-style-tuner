@@ -16,6 +16,7 @@ import Controls from './components/Controls';
 import OverlayModal, { ModalMode } from './components/OverlayModal';
 import FriendGate from './components/FriendGate';
 import ApiKeyModal from './components/ApiKeyModal';
+import AboutModal from './components/AboutModal';
 import { AlertCircle, Moon, Sun, Shield } from 'lucide-react';
 import { useLocalStorage } from './services/useLocalStorage';
 
@@ -108,6 +109,7 @@ const App: React.FC = () => {
   // const [hasApiKey, setHasApiKey] = useState(!!process.env.API_KEY);
   const [hasApiKey, setHasApiKey] = useLocalStorage<boolean>('arena-has-api-key', false);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [userApiKey, setUserApiKey] = useState<string | null>(null);  // TODO: need to fix this omg!
 
   /***** EFFECTS *************************************************** */
@@ -400,6 +402,17 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+
+      <button
+        onClick={() => setShowAbout(true)}
+        aria-label="About"
+        title="About"
+        className="fixed bottom-6 right-6 z-40 w-9 h-9 rounded-full border flex items-center justify-center text-sm font-mono transition-colors bg-arena-cream border-arena-border text-arena-charcoal hover:text-arena-green dark:bg-arena-dark-bg dark:border-arena-dark-border dark:text-arena-dark-text"
+      >
+        ?
+      </button>
+
+      <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
 
       <ApiKeyModal
         isOpen={showApiKeyModal}
