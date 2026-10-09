@@ -19,5 +19,5 @@ By [Concourse Codes](https://concourse.codes)
 
 - **App.tsx**: React-TypeScript root node
 
-### API Key Logic
-- Allow users a few tries with approved API key
+### Cloud Infra Update
+- Moved from Google Cloud to Vercel deployment for more secure & consistent infra implementation (Oct. 9, 2026)

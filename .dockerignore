@@ -1,9 +1,0 @@
-node_modes
-.git
-.gitignore
-.github
-npm-debug.log*
-.env
-.env.*
-Dockerfile
-cloudbuild.yaml
