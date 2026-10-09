@@ -1,20 +1,23 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Are.na Style Synthesizer
 
-# Run and deploy your AI Studio app
+Side project exploring LLM image generation & fine-tuning using [are.na](https://are.na) channels.
 
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/drive/1NQKtRDG4SKvB0V2IomuTJWnClsad1CoF
+By [Concourse Codes](https://concourse.codes)
 
 ## Run Locally
 
 **Prerequisites:**  Node.js
-
 
 1. Install dependencies:
    `npm install`
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+
+## Implementation/Architecture Details
+
+- **App.tsx**: React-TypeScript root node
+
+### API Key Logic
+- Allow users a few tries with approved API key

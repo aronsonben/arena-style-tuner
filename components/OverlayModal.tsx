@@ -57,6 +57,20 @@ const OverlayModal: React.FC<OverlayModalProps> = ({
       ? "text-slate-500 dark:text-slate-400" 
       : "text-neutral-500";
 
+  // Copy to clipboard state
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    if (prompt) {
+      try {
+        await navigator.clipboard.writeText(prompt);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1200);
+      } catch (e) {
+        // Optionally handle error
+      }
+    }
+  };
+
   return (
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-200 ${
       isProcessing ? 'bg-arena-beige/80 dark:bg-arena-dark-bg/90' : 'bg-arena-cream/95 dark:bg-arena-dark-bg/95'
@@ -76,15 +90,46 @@ const OverlayModal: React.FC<OverlayModalProps> = ({
           <h3 className={`font-mono text-xs uppercase tracking-widest truncate max-w-[75%] ${headerClass}`}>
             {headerTitle}
           </h3>
-          <button 
-            onClick={onClose}
-            disabled={isProcessing}
-            className={`p-2 rounded-full transition-colors ${
-              isProcessing ? 'opacity-10 cursor-not-allowed' : 'hover:bg-arena-border-light dark:hover:bg-arena-dark-surface-elevated text-arena-text-muted dark:text-arena-dark-text-muted'
-            }`}
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Copy to clipboard button, only if prompt exists */}
+            {prompt && (
+              <button
+                onClick={handleCopy}
+                disabled={isProcessing}
+                title="Copy prompt to clipboard"
+                className={`p-2 rounded-full transition-colors border border-transparent ${
+                  isProcessing
+                    ? 'opacity-10 cursor-not-allowed'
+                    : copied
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                      : 'hover:bg-arena-border-light dark:hover:bg-arena-dark-surface-elevated text-arena-text-muted dark:text-arena-dark-text-muted'
+                }`}
+                style={{ transition: 'background 0.2s, color 0.2s' }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" className="fill-none" />
+                  <rect x="3" y="3" width="13" height="13" rx="2" className="fill-none" />
+                </svg>
+                <span className="sr-only">Copy prompt</span>
+              </button>
+            )}
+            <button 
+              onClick={onClose}
+              disabled={isProcessing}
+              className={`p-2 rounded-full transition-colors ${
+                isProcessing ? 'opacity-10 cursor-not-allowed' : 'hover:bg-arena-border-light dark:hover:bg-arena-dark-surface-elevated text-arena-text-muted dark:text-arena-dark-text-muted'
+              }`}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Content Area */}
