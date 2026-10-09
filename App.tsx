@@ -7,8 +7,7 @@ import {
 } from './types';
 import { extractChannelSlug, urlToBase64 } from './services/utils';
 import { fetchChannelMetadata, fetchChannelBlocks } from './services/arenaService';
-import { generateStyledImage } from './services/geminiService';
-import { RateLimitService } from './services/rateLimitService';
+import { generateStyledImage, fetchQuota } from './services/geminiService';
 
 // Components
 import ChannelInput from './components/ChannelInput';
@@ -50,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-end">
         <div className="flex items-center gap-2 mb-0.5">
-          {hasApiKey ? (
+          {/* {hasApiKey ? (
             <button
               onClick={onOpenApiKeyModal}
               title="Edit API key"
@@ -68,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({
               ✗ API KEY
             </button>
           )}
-          <Shield className="w-3 h-3 text-arena-green" />
+          <Shield className="w-3 h-3 text-arena-green" /> */}
           {channelTitle && <div className="text-xs font-mono truncate max-w-37.5 sm:max-w-50 text-arena-text-muted dark:text-arena-dark-text-muted">{channelTitle}</div>}
         </div>
         <div className="text-[10px] font-mono opacity-70 flex items-center gap-3 text-arena-brown dark:text-arena-dark-text-muted">
@@ -114,33 +113,9 @@ const App: React.FC = () => {
   /***** EFFECTS *************************************************** */
   /*******************************************************************/
 
-  /** API key handling upon load */
-  // TODO: fix this
+  /** Load the server-enforced free-generation count on mount */
   useEffect(() => {
-
-    /** Check if the user has an api key saved based on the following (future state)(oct. 9, '26):
-     * 0) If Dev mode, check for local API Key env var
-     * 1) is user authed / signed in
-     * 2) fetch from secure storage in db
-     * 3) (TODO) some secure client-side method of storing that user has api key somewhere
-     * 4) check local storage
-     */
-    const checkApiKey = async () => {
-      // 0) Dev mode: the server function holds GEMINI_API_KEY (run `vercel dev`)
-      if (process.env.NODE_ENV === 'development') {
-        setHasApiKey(true);
-        setShowApiKeyModal(false);
-        return;
-      } 
-
-      // 1) if not dev mode, allow use without API key until limit reached (TODO: how to ensure limit reached securely)
-      if (process.env.NODE_ENV === 'production') {
-        // TODO: ...
-      }
-    };
-
-    updateQuotaDisplay(false);
-    checkApiKey();
+    updateQuotaDisplay();
   }, []);
 
   /** Check for existing session and handle dark mode */
@@ -159,9 +134,19 @@ const App: React.FC = () => {
     }
   }, [isDark]);
 
-  const updateQuotaDisplay = (hasUserKey: boolean) => {
-    const { remaining } = RateLimitService.checkLimit(hasUserKey);
-    setQuotaInfo({ remaining });
+  const updateQuotaDisplay = async () => {
+    // if DEV qutoa is irrelevant
+    if (process.env.NODE_ENV === 'development') {
+      setQuotaInfo({ remaining: 999 });
+      return; 
+    }
+
+    try {
+      const { remaining } = await fetchQuota();
+      setQuotaInfo({ remaining });
+    } catch (e) {
+      console.warn('Failed to load quota', e);
+    }
   };
 
   /** handle friend-gate unlock */
@@ -174,25 +159,6 @@ const App: React.FC = () => {
       setAuthError(true);
     }
   };
-
-  /** UPDATE - OCT. 9 '26: Do NOT allow for manually adding API key until secure server-side logic available */
-  /* const handleManualApiKey = (key: string) => {
-    setUserApiKey(key);
-    setHasApiKey(true);
-    setShowApiKeyModal(false);
-    updateQuotaDisplay(true);
-    // Persist for the duration of this browser session only
-    sessionStorage.setItem('arena_user_api_key', key);
-  }; */
-
-  /** UPDATE - OCT. 9 '26: Do NOT allow for manually adding API key until secure server-side logic available */
-  /* const handleDisconnectApiKey = () => {
-    setUserApiKey(null);
-    setHasApiKey(false);
-    updateQuotaDisplay(false);
-    sessionStorage.removeItem('arena_user_api_key');
-    setShowApiKeyModal(true);
-  }; */
 
   /***** ARENA FUNCS *********************************************** */
   /*******************************************************************/
@@ -283,11 +249,6 @@ const App: React.FC = () => {
   const handleGenerate = async (prompt: string) => {
     setError(null);
     setGenError(null);
-    const limit = RateLimitService.checkLimit(hasApiKey);
-    if (!limit.allowed) {
-      setError(limit.reason || "Quota limit reached.");
-      return;
-    }
 
     setState(AppState.PROCESSING_REFERENCES);
     setLastPrompt(prompt);
@@ -312,17 +273,17 @@ const App: React.FC = () => {
       setState(AppState.GENERATING);
       const result = await generateStyledImage(prompt, validImages, userApiKey ?? undefined);
       
-      RateLimitService.recordUsage(hasApiKey);
-      updateQuotaDisplay(hasApiKey);
+      setQuotaInfo({ remaining: result.remaining });
       
       setGeneratedImage(result.imageUrl);
       setState(AppState.COMPLETE);
 
     } catch (err: any) {
       const errMsg = err.message || JSON.stringify(err);
+      updateQuotaDisplay();
       if (errMsg.includes("403") || errMsg.includes("PERMISSION_DENIED")) {
          setHasApiKey(false);
-         setError("Permission denied. Select a valid API key.");
+         setError("Permission denied. Invalid API key. Please contact developer for further issues or return later.");
       } else {
          setGenError(err.message || "Generation failed.");
       }
@@ -365,9 +326,10 @@ const App: React.FC = () => {
 
   const modalMode = getModalMode();
 
-  if (state === AppState.UNAUTHENTICATED) {
-    return <FriendGate onUnlock={handleUnlock} isError={authError} />;
-  }
+  // Removing friend gate but leaving deprecated during cloud infra migration (oct. 9, 2026)
+  // if (state === AppState.UNAUTHENTICATED) {
+  //   return <FriendGate onUnlock={handleUnlock} isError={authError} />;
+  // }
 
   return (
     <div className={`min-h-screen transition-colors duration-300 bg-arena-cream text-arena-charcoal dark:bg-arena-dark-bg dark:text-arena-dark-text`}>

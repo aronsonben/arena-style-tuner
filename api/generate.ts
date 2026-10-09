@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
+import { perIpLimiter, globalLimiter, GLOBAL_KEY, getClientIp, IS_DEV, PER_IP_DAILY_LIMIT } from './_lib/limiter';
 
 export const config = { maxDuration: 60 };
 
@@ -14,6 +15,9 @@ const SYSTEM_INSTRUCTION = `You are a world-class visual synthesizer.
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+/**
+ * Gemini image generate handler for Vercel serverless function
+ */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -28,9 +32,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Invalid reference images.' });
   }
 
-  const key = (typeof apiKey === 'string' && apiKey) || process.env.GEMINI_API_KEY;
+  const key = IS_DEV
+    ? process.env.GEMINI_API_KEY
+    : (typeof apiKey === 'string' && apiKey) || process.env.GEMINI_API_KEY;
   if (!key) {
     return res.status(500).json({ error: 'Server API key is not configured.' });
+  }
+
+  // Fail closed: if the limiter store is down, don't spend on Gemini.
+  let remaining = PER_IP_DAILY_LIMIT;
+  try {
+    if (!IS_DEV) {
+      const ipResult = await perIpLimiter.limit(getClientIp(req));
+      if (!ipResult.success) {
+        return res.status(429).json({ error: 'Daily generation limit reached.', remaining: 0, resetsAt: ipResult.reset });
+      }
+      const globalResult = await globalLimiter.limit(GLOBAL_KEY);
+      if (!globalResult.success) {
+        return res.status(429).json({ error: 'The demo is at capacity today. Please try again tomorrow.', remaining: ipResult.remaining, resetsAt: globalResult.reset });
+      }
+      remaining = ipResult.remaining;
+    }
+  } catch (err) {
+    console.error('[api/generate] Rate limiter error:', err);
+    return res.status(503).json({ error: 'Service temporarily unavailable.' });
   }
 
   const parts: any[] = [];
@@ -69,6 +94,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         imageUrl: `data:image/png;base64,${imagePart.inlineData.data}`,
         promptTokens: usage?.promptTokenCount || 0,
         candidateTokens: usage?.candidatesTokenCount || 0,
+        remaining,
       });
     } catch (err: any) {
       const msg: string = err?.message || JSON.stringify(err);

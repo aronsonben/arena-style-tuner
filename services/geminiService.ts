@@ -5,7 +5,14 @@ export interface GenerationResult {
   imageUrl: string;
   promptTokens: number;
   candidateTokens: number;
+  remaining: number;
 }
+
+export const fetchQuota = async (): Promise<{ remaining: number }> => {
+  const res = await fetch('/api/quota');
+  if (!res.ok) throw new Error('Quota unavailable');
+  return res.json();
+};
 
 /**
  * Generates a new image that synthesizes the stylistic "DNA" of reference images.
