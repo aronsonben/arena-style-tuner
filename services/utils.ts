@@ -1,3 +1,5 @@
+import { ProcessedImage } from "@/types";
+
 /**
  * Extracts the channel slug from an Are.na URL.
  * Supports formats:
@@ -60,3 +62,27 @@ export const urlToBase64 = async (url: string): Promise<{ base64: string; mimeTy
     reader.readAsDataURL(blob);
   });
 };
+
+
+/** Helper to get the total blob size of images and print it out */
+export const getImgBlobSize = async (images: ProcessedImage[]) => {
+  let totalSize = 0;
+  const urls = images.map((image) => image.url);
+
+  for (const url of urls) {
+    // Use a CORS proxy to fetch the image data
+    // const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+    const proxyUrl = url;
+
+    const response = await fetch(proxyUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.statusText}`);
+    }
+
+    const blob = await response.blob();
+    totalSize += blob.size;
+  }
+
+  console.log("Total blob size: ", totalSize);
+  return totalSize;
+}

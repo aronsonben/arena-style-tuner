@@ -5,7 +5,7 @@ import {
   ArenaChannel, 
   ProcessedImage 
 } from './types';
-import { extractChannelSlug, urlToBase64 } from './services/utils';
+import { extractChannelSlug, getImgBlobSize, urlToBase64 } from './services/utils';
 import { fetchChannelMetadata, fetchChannelBlocks } from './services/arenaService';
 import { generateStyledImage, fetchQuota } from './services/geminiService';
 
@@ -19,6 +19,7 @@ import ApiKeyModal from './components/ApiKeyModal';
 import AboutModal from './components/AboutModal';
 import { AlertCircle, Moon, Sun, Shield } from 'lucide-react';
 import { useLocalStorage } from './services/useLocalStorage';
+import { trackEvent } from './services/analytics';
 
 const SELECTION_LIMIT = 10;
 // In a real prod environment, this would be validated on a backend.
@@ -118,6 +119,7 @@ const App: React.FC = () => {
   /** Load the server-enforced free-generation count on mount */
   useEffect(() => {
     updateQuotaDisplay();
+    trackEvent('app_loaded', { has_api_key: hasApiKey });
   }, []);
 
   /** Check for existing session and handle dark mode */
@@ -171,6 +173,7 @@ const App: React.FC = () => {
     setGenError(null);
     setState(AppState.LOADING_CHANNEL);
     setCurrentPage(1);
+    trackEvent('channel_load_started');
 
     try {
       const slug = extractChannelSlug(url);
@@ -189,7 +192,9 @@ const App: React.FC = () => {
       setImages(processed);
       setHasMore(hasMore);
       setState(AppState.SELECTING);
+      trackEvent('channel_loaded', { channel_slug: slug, image_count: processed.length });
     } catch (err: any) {
+      trackEvent('channel_load_failed', { reason: String(err.message || 'unknown').slice(0, 100) });
       setError(err.message || "Failed to load channel");
       setState(AppState.IDLE);
     }
@@ -201,6 +206,7 @@ const App: React.FC = () => {
     
     setIsLoadingMore(true);
     const nextPage = currentPage + 1;
+    trackEvent('load_more_images', { page: nextPage });
 
     try {
       const { contents, hasMore } = await fetchChannelBlocks(channel.slug, nextPage);
@@ -230,10 +236,13 @@ const App: React.FC = () => {
       
       if (target && !target.selected && currentSelectedCount >= SELECTION_LIMIT) {
         setError(`Maximum of ${SELECTION_LIMIT} images can be selected.`);
+        trackEvent('selection_limit_hit');
         return prev;
       }
       
       if (error && error.includes('Maximum')) setError(null);
+
+      target ? getImgBlobSize([target]) : null;        // log the blob size
 
       return prev.map(img => {
         if (img.id === id) return { ...img, selected: !img.selected };
@@ -254,10 +263,17 @@ const App: React.FC = () => {
 
     setState(AppState.PROCESSING_REFERENCES);
     setLastPrompt(prompt);
+    trackEvent('generate_started', {
+      selected_count: images.filter(img => img.selected).length,
+      prompt_length: prompt.length,
+      used_own_key: !!userApiKey,
+    });
 
     try {
       const selectedImages = images.filter(img => img.selected);
-      
+
+      // getImgBlobSize(selectedImages);   // print the blob size for logging purposes
+
       const imagesWithBase64 = await Promise.all(
         selectedImages.map(async (img): Promise<ProcessedImage | null> => {
           try {
@@ -279,9 +295,11 @@ const App: React.FC = () => {
       
       setGeneratedImage(result.imageUrl);
       setState(AppState.COMPLETE);
+      trackEvent('generate_succeeded', { remaining: result.remaining });
 
     } catch (err: any) {
       const errMsg = err.message || JSON.stringify(err);
+      trackEvent('generate_failed', { reason: String(errMsg).slice(0, 100) });
       updateQuotaDisplay();
       if (errMsg.includes("403") || errMsg.includes("PERMISSION_DENIED")) {
          setHasApiKey(false);
@@ -295,6 +313,7 @@ const App: React.FC = () => {
 
   /** Full reset of app state back to home */
   const handleReset = () => {
+    trackEvent('reset');
     setChannel(null);
     setImages([]);
     setGeneratedImage(null);
@@ -309,6 +328,7 @@ const App: React.FC = () => {
   /** Handle download of image after generation */
   const handleDownload = () => {
     if (generatedImage) {
+      trackEvent('image_downloaded');
       const link = document.createElement('a');
       link.href = link.href = generatedImage;
       link.download = `arena-remix-${Date.now()}.png`;
@@ -342,7 +362,10 @@ const App: React.FC = () => {
         isDark={isDark}
         onReset={handleReset}
         onOpenApiKeyModal={() => setShowApiKeyModal(true)}
-        onToggleTheme={() => setIsDark(!isDark)}
+        onToggleTheme={() => {
+          trackEvent('theme_toggled', { to: isDark ? 'light' : 'dark' });
+          setIsDark(!isDark);
+        }}
       />
 
       <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto min-h-screen pb-32">
@@ -395,7 +418,10 @@ const App: React.FC = () => {
                   setGeneratedImage(null);
                   setGenError(null);
                 }}
-                onRetry={() => handleGenerate(lastPrompt)}
+                onRetry={() => {
+                  trackEvent('generate_retry');
+                  handleGenerate(lastPrompt);
+                }}
                 onDownload={handleDownload}
               />
             )}
@@ -404,7 +430,10 @@ const App: React.FC = () => {
       </main>
 
       <button
-        onClick={() => setShowAbout(true)}
+        onClick={() => {
+          trackEvent('about_opened');
+          setShowAbout(true);
+        }}
         aria-label="About"
         title="About"
         className="fixed bottom-6 right-6 z-40 w-9 h-9 rounded-full border flex items-center justify-center text-sm font-mono transition-colors bg-arena-cream border-arena-border text-arena-charcoal hover:text-arena-green dark:bg-arena-dark-bg dark:border-arena-dark-border dark:text-arena-dark-text"
