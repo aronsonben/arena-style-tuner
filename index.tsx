@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import ResetPasswordPage from './components/ResetPasswordPage';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -8,8 +9,10 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
+const isResetPasswordRoute = window.location.pathname === '/reset-password';
+
 root.render(
   <React.StrictMode>
-    <App />
+    {isResetPasswordRoute ? <ResetPasswordPage /> : <App />}
   </React.StrictMode>
 );

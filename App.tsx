@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { 
   AppState, 
   ArenaChannel, 
@@ -8,6 +9,7 @@ import {
 import { extractChannelSlug, getImgBlobSize, urlToBase64 } from './services/utils';
 import { fetchChannelMetadata, fetchChannelBlocks } from './services/arenaService';
 import { generateStyledImage, fetchQuota } from './services/geminiService';
+import { supabase } from './services/supabase';
 
 // Components
 import ChannelInput from './components/ChannelInput';
@@ -20,6 +22,7 @@ import AboutModal from './components/AboutModal';
 import { AlertCircle, Moon, Sun, Shield } from 'lucide-react';
 import { useLocalStorage } from './services/useLocalStorage';
 import { trackEvent } from './services/analytics';
+import LoginModal from './components/LoginModal';
 
 const SELECTION_LIMIT = 10;
 // In a real prod environment, this would be validated on a backend.
@@ -30,8 +33,10 @@ interface HeaderProps {
   channelTitle?: string;
   remaining: number;
   isDark: boolean;
+  authUser: User | null;
   onReset: () => void;
   onOpenApiKeyModal: () => void;
+  onOpenLoginModal: () => void;
   onToggleTheme: () => void;
 }
 
@@ -40,8 +45,10 @@ const Header: React.FC<HeaderProps> = ({
   channelTitle,
   remaining,
   isDark,
+  authUser,
   onReset,
   onOpenApiKeyModal,
+  onOpenLoginModal,
   onToggleTheme,
 }) => (
   <header className={`fixed top-0 left-0 right-0 h-16 backdrop-blur-md border-b z-40 flex items-center px-6 justify-between transition-colors duration-300 bg-arena-cream/80 border-arena-border dark:bg-arena-dark-bg/80 dark:border-arena-dark-border`}>
@@ -73,7 +80,15 @@ const Header: React.FC<HeaderProps> = ({
           {channelTitle && <div className="text-xs font-mono truncate max-w-37.5 sm:max-w-50 text-arena-text-muted dark:text-arena-dark-text-muted">{channelTitle}</div>}
         </div>
         <div className="text-[10px] font-mono opacity-70 flex items-center gap-3 text-arena-brown dark:text-arena-dark-text-muted">
-          <span title="Generations Remaining">{remaining} GENS LEFT</span>
+          <p title="Generations Remaining" className="cursor-pointer" onClick={onOpenLoginModal} >{remaining} GENS LEFT</p>
+          <span className="h-2 w-px bg-arena-border dark:bg-arena-dark-border"></span>
+          <button
+            onClick={onOpenLoginModal}
+            className={`uppercase ${authUser ? 'text-arena-green' : 'text-red-400'}`}
+            title={authUser?.email ?? 'Not logged in'}
+          >
+            {authUser ? 'Logged In' : 'No User'}
+          </button>
           <span className="h-2 w-px bg-arena-border dark:bg-arena-dark-border"></span>
           <button
             onClick={onToggleTheme}
@@ -99,7 +114,7 @@ const App: React.FC = () => {
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
-  const [quotaInfo, setQuotaInfo] = useState({ remaining: 5 });
+  const [quotaInfo, setQuotaInfo] = useState({ remaining: 3 });
   const [authError, setAuthError] = useState(false);
   
   // Pagination State
@@ -110,8 +125,10 @@ const App: React.FC = () => {
   // const [hasApiKey, setHasApiKey] = useState(!!process.env.API_KEY);
   const [hasApiKey, setHasApiKey] = useLocalStorage<boolean>('arena-has-api-key', false);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [userApiKey, setUserApiKey] = useState<string | null>(null);  // TODO: need to fix this omg!
+  const [authUser, setAuthUser] = useState<User | null>(null);
 
   /***** EFFECTS *************************************************** */
   /*******************************************************************/
@@ -120,6 +137,19 @@ const App: React.FC = () => {
   useEffect(() => {
     updateQuotaDisplay();
     trackEvent('app_loaded', { has_api_key: hasApiKey });
+  }, []);
+
+  /** Track the current Supabase auth session, including on page load */
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAuthUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setAuthUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   /** Check for existing session and handle dark mode */
@@ -163,6 +193,24 @@ const App: React.FC = () => {
       setAuthError(true);
     }
   };
+
+  /***** MISC. HANDLER FUNCS *********************************************** */
+  /***************************************************************************/
+
+  /** Modal switch handler */
+  const getModalMode = (): ModalMode | null => {
+    if (state === AppState.PROCESSING_REFERENCES || state === AppState.GENERATING) return 'PROCESSING';
+    if (generatedImage) return 'RESULT';
+    if (genError) return 'ERROR';
+    return null;
+  };
+
+  const modalMode = getModalMode();
+
+  // Removing friend gate but leaving deprecated during cloud infra migration (oct. 9, 2026)
+  // if (state === AppState.UNAUTHENTICATED) {
+  //   return <FriendGate onUnlock={handleUnlock} isError={authError} />;
+  // }
 
   /***** ARENA FUNCS *********************************************** */
   /*******************************************************************/
@@ -338,20 +386,8 @@ const App: React.FC = () => {
     }
   };
 
-  /** Modal switch handler */
-  const getModalMode = (): ModalMode | null => {
-    if (state === AppState.PROCESSING_REFERENCES || state === AppState.GENERATING) return 'PROCESSING';
-    if (generatedImage) return 'RESULT';
-    if (genError) return 'ERROR';
-    return null;
-  };
-
-  const modalMode = getModalMode();
-
-  // Removing friend gate but leaving deprecated during cloud infra migration (oct. 9, 2026)
-  // if (state === AppState.UNAUTHENTICATED) {
-  //   return <FriendGate onUnlock={handleUnlock} isError={authError} />;
-  // }
+  /***** JSX RETURN CODE  ************************************************** */
+  /***************************************************************************/
 
   return (
     <div className={`min-h-screen transition-colors duration-300 bg-arena-cream text-arena-charcoal dark:bg-arena-dark-bg dark:text-arena-dark-text`}>
@@ -360,8 +396,10 @@ const App: React.FC = () => {
         channelTitle={channel?.title}
         remaining={quotaInfo.remaining}
         isDark={isDark}
+        authUser={authUser}
         onReset={handleReset}
         onOpenApiKeyModal={() => setShowApiKeyModal(true)}
+        onOpenLoginModal={() => setShowLoginModal(true)}
         onToggleTheme={() => {
           trackEvent('theme_toggled', { to: isDark ? 'light' : 'dark' });
           setIsDark(!isDark);
@@ -447,6 +485,14 @@ const App: React.FC = () => {
         isOpen={showApiKeyModal}
         onConnect={() => null}
         onDismiss={() => setShowApiKeyModal(false)}
+        onDisconnect={() => null}
+      />
+
+      <LoginModal
+        isOpen={showLoginModal}
+        user={authUser}
+        onConnect={() => null}
+        onDismiss={() => setShowLoginModal(false)}
         onDisconnect={() => null}
       />
     </div>

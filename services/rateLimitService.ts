@@ -2,7 +2,7 @@
 const GENERATION_KEY_SHARED = 'arena_synth_generations_used';
 const GENERATION_KEY_OWN = 'arena_synth_generations_used_own';
 const MAX_GENERATIONS_WITH_KEY = 10;
-const MAX_GENERATIONS_WITHOUT_KEY = 5;
+const MAX_GENERATIONS_WITHOUT_KEY = 3;
 
 export const RateLimitService = {
   /**
