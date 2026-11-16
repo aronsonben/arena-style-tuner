@@ -17,11 +17,11 @@ import ImageGrid from './components/ImageGrid';
 import Controls from './components/Controls';
 import OverlayModal, { ModalMode } from './components/OverlayModal';
 import FriendGate from './components/FriendGate';
-import ApiKeyModal from './components/ApiKeyModal';
 import AboutModal from './components/AboutModal';
 import { AlertCircle, Moon, Sun, Shield } from 'lucide-react';
 import { useLocalStorage } from './services/useLocalStorage';
 import { trackEvent } from './services/analytics';
+import { hasGeminiKey } from './services/supabase';
 import LoginModal from './components/LoginModal';
 
 const SELECTION_LIMIT = 10;
@@ -29,25 +29,23 @@ const SELECTION_LIMIT = 10;
 const SHARED_FRIEND_CODE = 'arena'; 
 
 interface HeaderProps {
-  hasApiKey: boolean;
   channelTitle?: string;
-  remaining: number;
+  remaining: number | null;
+  hasOwnKey: boolean;
   isDark: boolean;
   authUser: User | null;
   onReset: () => void;
-  onOpenApiKeyModal: () => void;
   onOpenLoginModal: () => void;
   onToggleTheme: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
-  hasApiKey,
   channelTitle,
   remaining,
+  hasOwnKey,
   isDark,
   authUser,
   onReset,
-  onOpenApiKeyModal,
   onOpenLoginModal,
   onToggleTheme,
 }) => (
@@ -58,29 +56,16 @@ const Header: React.FC<HeaderProps> = ({
     <div className="flex items-center gap-4">
       <div className="flex flex-col items-end">
         <div className="flex items-center gap-2 mb-0.5">
-          {/* {hasApiKey ? (
-            <button
-              onClick={onOpenApiKeyModal}
-              title="Edit API key"
-              className="text-[10px] font-mono flex items-center gap-1 text-arena-green hover:text-arena-tan transition-colors cursor-pointer group"
-            >
-              <span className="group-hover:hidden">✓ API KEY</span>
-              <span className="hidden group-hover:inline">EDIT API KEY</span>
-            </button>
-          ) : (
-            <button
-              onClick={onOpenApiKeyModal}
-              title="Add API key"
-              className="text-[10px] font-mono flex items-center gap-1 text-red-400 hover:text-arena-green transition-colors cursor-pointer"
-            >
-              ✗ API KEY
-            </button>
-          )}
-          <Shield className="w-3 h-3 text-arena-green" /> */}
           {channelTitle && <div className="text-xs font-mono truncate max-w-37.5 sm:max-w-50 text-arena-text-muted dark:text-arena-dark-text-muted">{channelTitle}</div>}
         </div>
         <div className="text-[10px] font-mono opacity-70 flex items-center gap-3 text-arena-brown dark:text-arena-dark-text-muted">
-          <p title="Generations Remaining" className="cursor-pointer" onClick={onOpenLoginModal} >{remaining} GENS LEFT</p>
+          {hasOwnKey ? (
+            <p title="Using your own API key" className="cursor-pointer text-arena-green" onClick={onOpenLoginModal}>OWN KEY ACTIVE</p>
+          ) : remaining !== null && remaining <= 0 ? (
+            <p title="Add your own API key to keep generating" className="cursor-pointer text-red-400" onClick={onOpenLoginModal}>ADD API KEY TO CONTINUE</p>
+          ) : (
+            <p title="Generations Remaining" className="cursor-pointer" onClick={onOpenLoginModal}>{remaining} GENS LEFT</p>
+          )}
           <span className="h-2 w-px bg-arena-border dark:bg-arena-dark-border"></span>
           <button
             onClick={onOpenLoginModal}
@@ -114,7 +99,7 @@ const App: React.FC = () => {
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
-  const [quotaInfo, setQuotaInfo] = useState({ remaining: 3 });
+  const [quotaInfo, setQuotaInfo] = useState<{ remaining: number | null; hasOwnKey: boolean }>({ remaining: 2, hasOwnKey: false });
   const [authError, setAuthError] = useState(false);
   
   // Pagination State
@@ -122,13 +107,10 @@ const App: React.FC = () => {
   const [hasMore, setHasMore] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // const [hasApiKey, setHasApiKey] = useState(!!process.env.API_KEY);
-  const [hasApiKey, setHasApiKey] = useLocalStorage<boolean>('arena-has-api-key', false);
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
-  const [userApiKey, setUserApiKey] = useState<string | null>(null);  // TODO: need to fix this omg!
   const [authUser, setAuthUser] = useState<User | null>(null);
+  const [hasStoredKey, setHasStoredKey] = useState(false);
 
   /***** EFFECTS *************************************************** */
   /*******************************************************************/
@@ -136,7 +118,7 @@ const App: React.FC = () => {
   /** Load the server-enforced free-generation count on mount */
   useEffect(() => {
     updateQuotaDisplay();
-    trackEvent('app_loaded', { has_api_key: hasApiKey });
+    trackEvent('app_loaded');
   }, []);
 
   /** Track the current Supabase auth session, including on page load */
@@ -151,6 +133,15 @@ const App: React.FC = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  /** Keep the BYOK connection status in sync with whichever account is signed in */
+  useEffect(() => {
+    if (!authUser) {
+      setHasStoredKey(false);
+      return;
+    }
+    hasGeminiKey().then(setHasStoredKey).catch(() => setHasStoredKey(false));
+  }, [authUser]);
 
   /** Check for existing session and handle dark mode */
   useEffect(() => {
@@ -171,13 +162,13 @@ const App: React.FC = () => {
   const updateQuotaDisplay = async () => {
     // if DEV qutoa is irrelevant
     if (process.env.NODE_ENV === 'development') {
-      setQuotaInfo({ remaining: 999 });
+      setQuotaInfo({ remaining: 999, hasOwnKey: false });
       return; 
     }
 
     try {
-      const { remaining } = await fetchQuota();
-      setQuotaInfo({ remaining });
+      const { remaining, hasOwnKey } = await fetchQuota();
+      setQuotaInfo({ remaining, hasOwnKey });
     } catch (e) {
       console.warn('Failed to load quota', e);
     }
@@ -309,12 +300,19 @@ const App: React.FC = () => {
     setError(null);
     setGenError(null);
 
+    // Client-side gate for UX only; the server independently enforces this via the free-quota limiter.
+    if (!hasStoredKey && quotaInfo.remaining !== null && quotaInfo.remaining <= 0) {
+      setError('Free generation limit reached. Add your own Gemini API key to keep generating.');
+      setShowLoginModal(true);
+      return;
+    }
+
     setState(AppState.PROCESSING_REFERENCES);
     setLastPrompt(prompt);
     trackEvent('generate_started', {
       selected_count: images.filter(img => img.selected).length,
       prompt_length: prompt.length,
-      used_own_key: !!userApiKey,
+      used_own_key: hasStoredKey,
     });
 
     try {
@@ -337,20 +335,20 @@ const App: React.FC = () => {
       if (validImages.length === 0) throw new Error("Could not process reference images.");
 
       setState(AppState.GENERATING);
-      const result = await generateStyledImage(prompt, validImages, userApiKey ?? undefined);
+      const result = await generateStyledImage(prompt, validImages);
       
-      setQuotaInfo({ remaining: result.remaining });
+      setQuotaInfo({ remaining: result.remaining, hasOwnKey: result.remaining === null });
       
       setGeneratedImage(result.imageUrl);
       setState(AppState.COMPLETE);
-      trackEvent('generate_succeeded', { remaining: result.remaining });
+      trackEvent('generate_succeeded', { remaining: result.remaining ?? undefined });
 
     } catch (err: any) {
       const errMsg = err.message || JSON.stringify(err);
       trackEvent('generate_failed', { reason: String(errMsg).slice(0, 100) });
       updateQuotaDisplay();
       if (errMsg.includes("403") || errMsg.includes("PERMISSION_DENIED")) {
-         setHasApiKey(false);
+         setHasStoredKey(false);
          setError("Permission denied. Invalid API key. Please contact developer for further issues or return later.");
       } else {
          setGenError(err.message || "Generation failed.");
@@ -392,13 +390,12 @@ const App: React.FC = () => {
   return (
     <div className={`min-h-screen transition-colors duration-300 bg-arena-cream text-arena-charcoal dark:bg-arena-dark-bg dark:text-arena-dark-text`}>
       <Header
-        hasApiKey={hasApiKey}
         channelTitle={channel?.title}
         remaining={quotaInfo.remaining}
+        hasOwnKey={hasStoredKey}
         isDark={isDark}
         authUser={authUser}
         onReset={handleReset}
-        onOpenApiKeyModal={() => setShowApiKeyModal(true)}
         onOpenLoginModal={() => setShowLoginModal(true)}
         onToggleTheme={() => {
           trackEvent('theme_toggled', { to: isDark ? 'light' : 'dark' });
@@ -481,16 +478,11 @@ const App: React.FC = () => {
 
       <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
 
-      <ApiKeyModal
-        isOpen={showApiKeyModal}
-        onConnect={() => null}
-        onDismiss={() => setShowApiKeyModal(false)}
-        onDisconnect={() => null}
-      />
-
       <LoginModal
         isOpen={showLoginModal}
         user={authUser}
+        hasStoredKey={hasStoredKey}
+        onHasStoredKeyChange={setHasStoredKey}
         onConnect={() => null}
         onDismiss={() => setShowLoginModal(false)}
         onDisconnect={() => null}

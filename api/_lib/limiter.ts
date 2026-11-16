@@ -8,7 +8,10 @@ const redis = new Redis({
   token: process.env.UPSTASH_CONCOURSE_KV_REST_API_TOKEN!,
 });
 
-export const PER_IP_DAILY_LIMIT = 5;
+// Generations allowed on the shared GEMINI_API_KEY before a user must bring their own.
+export const FREE_DAILY_LIMIT = 2;
+// Abuse backstop for users generating with their own key (their own Gemini billing applies).
+const BYOK_DAILY_LIMIT = 50;
 const GLOBAL_DAILY_LIMIT = 200;
 
 // `vercel dev` sets VERCEL_ENV=development; deployed builds use preview/production.
@@ -16,8 +19,14 @@ export const IS_DEV = process.env.NODE_ENV === 'development';
 
 export const perIpLimiter = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(PER_IP_DAILY_LIMIT, '1 d'),
+  limiter: Ratelimit.slidingWindow(FREE_DAILY_LIMIT, '1 d'),
   prefix: 'rl:ip',
+});
+
+export const perUserLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(BYOK_DAILY_LIMIT, '1 d'),
+  prefix: 'rl:user',
 });
 
 export const globalLimiter = new Ratelimit({

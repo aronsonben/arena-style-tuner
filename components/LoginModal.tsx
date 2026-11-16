@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { requestPasswordReset, signInExistingUser, signOutUser, signUpNewUser } from '../services/supabase';
+import { Eye, EyeOff } from 'lucide-react';
+import { deleteGeminiKey, requestPasswordReset, saveGeminiKey, signInExistingUser, signOutUser, signUpNewUser } from '../services/supabase';
 
 interface LoginModalProps {
   isOpen: boolean;
   user: User | null;
+  hasStoredKey: boolean;
+  onHasStoredKeyChange: (hasKey: boolean) => void;
   onConnect: (email: string) => void;
   onDismiss: () => void;
   onDisconnect?: () => void;
@@ -12,7 +15,7 @@ interface LoginModalProps {
 
 type AuthMode = 'sign-in' | 'sign-up' | 'forgot-password';
 
-const LoginModal: React.FC<LoginModalProps> = ({ isOpen, user, onConnect, onDismiss }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ isOpen, user, hasStoredKey, onHasStoredKeyChange, onConnect, onDismiss }) => {
   const [mode, setMode] = useState<AuthMode>('sign-in');
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
@@ -22,7 +25,58 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, user, onConnect, onDism
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
+  const [isEditingKey, setIsEditingKey] = useState(false);
+  const [showKeyForm, setShowKeyForm] = useState(false);
+  const [keyInput, setKeyInput] = useState('');
+  const [showKey, setShowKey] = useState(false);
+  const [keyError, setKeyError] = useState<string | null>(null);
+  const [isSavingKey, setIsSavingKey] = useState(false);
+  const [isRemovingKey, setIsRemovingKey] = useState(false);
+
   if (!isOpen) return null;
+
+  const closeKeyEditor = () => {
+    setIsEditingKey(false);
+    setShowKeyForm(false);
+    setKeyInput('');
+    setKeyError(null);
+  };
+
+  const handleSubmitKey = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setKeyError(null);
+    const trimmed = keyInput.trim();
+    if (!trimmed) {
+      setKeyError('That doesn\'t look like a valid Gemini API key.');
+      return;
+    }
+    setIsSavingKey(true);
+    try {
+      const { error } = await saveGeminiKey(trimmed);
+      if (error) throw error;
+      onHasStoredKeyChange(true);
+      closeKeyEditor();
+    } catch (err: any) {
+      setKeyError(err.message || 'Failed to save key. Please try again.');
+    } finally {
+      setIsSavingKey(false);
+    }
+  };
+
+  const handleRemoveKey = async () => {
+    setKeyError(null);
+    setIsRemovingKey(true);
+    try {
+      const { error } = await deleteGeminiKey();
+      if (error) throw error;
+      onHasStoredKeyChange(false);
+      closeKeyEditor();
+    } catch (err: any) {
+      setKeyError(err.message || 'Failed to remove key. Please try again.');
+    } finally {
+      setIsRemovingKey(false);
+    }
+  };
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -107,12 +161,91 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, user, onConnect, onDism
               </div>
             </div>
 
+            {/* User Info */}
             <div className="space-y-1 font-mono text-sm px-4 py-3 rounded-xl border bg-white dark:bg-arena-dark-surface border-arena-border dark:border-arena-dark-border text-arena-charcoal dark:text-arena-dark-text">
               <p>{user.email}</p>
               {user.created_at && (
                 <p className="text-xs text-arena-text-muted dark:text-arena-dark-text-muted">
                   Joined {new Date(user.created_at).toLocaleDateString()}
                 </p>
+              )}
+            </div>
+
+            {/* BYOK Status */}
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (isEditingKey) {
+                    closeKeyEditor();
+                  } else {
+                    setIsEditingKey(true);
+                    setShowKeyForm(!hasStoredKey);
+                  }
+                }}
+                className="w-full flex items-center justify-between font-mono text-sm px-4 py-3 rounded-xl border bg-white dark:bg-arena-dark-surface border-arena-border dark:border-arena-dark-border text-arena-charcoal dark:text-arena-dark-text hover:border-arena-green transition-colors"
+              >
+                <span>LLM API Key</span>
+                <span className={`uppercase text-xs ${hasStoredKey ? 'text-arena-green' : 'text-red-400'}`}>
+                  {hasStoredKey ? '✓ connected' : '✗ no'}
+                </span>
+              </button>
+
+              {isEditingKey && !showKeyForm && hasStoredKey && (
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowKeyForm(true)}
+                    className="w-full py-3 rounded-xl font-medium text-sm transition-colors border border-arena-border dark:border-arena-dark-border text-arena-charcoal dark:text-arena-dark-text hover:bg-arena-beige dark:hover:bg-arena-dark-surface"
+                  >
+                    Edit API Key
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRemoveKey}
+                    disabled={isRemovingKey}
+                    className="w-full py-3 rounded-xl font-medium text-sm transition-colors border border-arena-border dark:border-arena-dark-border text-arena-charcoal dark:text-arena-dark-text hover:text-red-500 hover:border-red-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {isRemovingKey ? 'Removing...' : 'Remove API Key'}
+                  </button>
+                </div>
+              )}
+
+              {isEditingKey && showKeyForm && (
+                <form onSubmit={handleSubmitKey} className="space-y-3">
+                  <div className="relative">
+                    <input
+                      type={showKey ? 'text' : 'password'}
+                      value={keyInput}
+                      onChange={(e) => setKeyInput(e.target.value)}
+                      placeholder="AIza..."
+                      autoComplete="off"
+                      spellCheck={false}
+                      className="w-full font-mono text-sm px-4 py-3 pr-12 rounded-xl border bg-white dark:bg-arena-dark-surface border-arena-border dark:border-arena-dark-border text-arena-charcoal dark:text-arena-dark-text placeholder-arena-border dark:placeholder-arena-dark-border focus:outline-none focus:ring-2 focus:ring-arena-green/50 transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowKey(prev => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-arena-tan dark:text-arena-dark-text-muted hover:text-arena-charcoal dark:hover:text-arena-dark-text transition-colors"
+                      tabIndex={-1}
+                      aria-label={showKey ? 'Hide key' : 'Show key'}
+                    >
+                      {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+
+                  {keyError && (
+                    <p className="text-xs text-red-500 dark:text-red-400">{keyError}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={!keyInput.trim() || isSavingKey}
+                    className="w-full py-3 rounded-xl font-medium text-sm transition-all bg-arena-charcoal dark:bg-arena-dark-text text-white dark:text-arena-dark-bg hover:bg-neutral-700 dark:hover:bg-arena-dark-text-muted disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {isSavingKey ? 'Saving...' : 'Save Key'}
+                  </button>
+                </form>
               )}
             </div>
 

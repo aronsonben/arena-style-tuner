@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
-import { perIpLimiter, globalLimiter, GLOBAL_KEY, getClientIp, IS_DEV, PER_IP_DAILY_LIMIT } from './_lib/limiter.js';
+import { perIpLimiter, perUserLimiter, globalLimiter, GLOBAL_KEY, getClientIp, IS_DEV, FREE_DAILY_LIMIT } from './_lib/limiter.js';
+import { resolveUserAndKey } from './_lib/userKey.js';
 
 export const config = { maxDuration: 60 };
 
@@ -23,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { prompt, referenceImages, apiKey } = req.body ?? {};
+  const { prompt, referenceImages } = req.body ?? {};
 
   if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > MAX_PROMPT_LENGTH) {
     return res.status(400).json({ error: 'Invalid prompt.' });
@@ -32,26 +33,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Invalid reference images.' });
   }
 
-  const key = IS_DEV
-    ? process.env.GEMINI_API_KEY
-    : (typeof apiKey === 'string' && apiKey) || process.env.GEMINI_API_KEY;
+  // Never trust a client-supplied key; look up the caller's own key (if any) server-side.
+  const { userId, apiKey: ownApiKey } = IS_DEV
+    ? { userId: null, apiKey: null }
+    : await resolveUserAndKey(req);
+
+  const key = IS_DEV ? process.env.GEMINI_API_KEY : ownApiKey || process.env.GEMINI_API_KEY;
   if (!key) {
     return res.status(500).json({ error: 'Server API key is not configured.' });
   }
 
   // Fail closed: if the limiter store is down, don't spend on Gemini.
-  let remaining = PER_IP_DAILY_LIMIT;
+  // null = BYOK, not subject to the shared free-quota.
+  let remaining: number | null = ownApiKey ? null : FREE_DAILY_LIMIT;
   try {
     if (!IS_DEV) {
-      const ipResult = await perIpLimiter.limit(getClientIp(req));
-      if (!ipResult.success) {
-        return res.status(429).json({ error: 'Daily generation limit reached.', remaining: 0, resetsAt: ipResult.reset });
+      if (ownApiKey) {
+        // BYOK path: no free-quota deduction, just an abuse backstop on the caller's own billing.
+        const userResult = await perUserLimiter.limit(userId!);
+        if (!userResult.success) {
+          return res.status(429).json({ error: 'Daily generation limit reached for your key.', remaining: 0, resetsAt: userResult.reset });
+        }
+      } else {
+        const ipResult = await perIpLimiter.limit(getClientIp(req));
+        if (!ipResult.success) {
+          return res.status(429).json({
+            error: 'Free generation limit reached. Add your own Gemini API key to keep generating.',
+            remaining: 0,
+            resetsAt: ipResult.reset,
+            needsApiKey: true,
+          });
+        }
+        const globalResult = await globalLimiter.limit(GLOBAL_KEY);
+        if (!globalResult.success) {
+          return res.status(429).json({ error: 'The demo is at capacity today. Please try again tomorrow.', remaining: ipResult.remaining, resetsAt: globalResult.reset });
+        }
+        remaining = ipResult.remaining;
       }
-      const globalResult = await globalLimiter.limit(GLOBAL_KEY);
-      if (!globalResult.success) {
-        return res.status(429).json({ error: 'The demo is at capacity today. Please try again tomorrow.', remaining: ipResult.remaining, resetsAt: globalResult.reset });
-      }
-      remaining = ipResult.remaining;
     }
   } catch (err) {
     console.error('[api/generate] Rate limiter error:', err);
@@ -71,6 +89,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
+      console.log("[generate] trying to generate and is dev? (", IS_DEV, ")");
       const response = await ai.models.generateContent({
         model: MODEL_NAME,
         contents: { parts },
