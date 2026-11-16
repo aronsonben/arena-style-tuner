@@ -20,6 +20,7 @@ export const getBearerToken = (req: VercelRequest): string | null => {
 export const resolveUserAndKey = async (
   req: VercelRequest
 ): Promise<{ userId: string | null; apiKey: string | null }> => {
+  // console.log("[userKey] trying to get user key right.... ", );
   const token = getBearerToken(req);
   if (!token) return { userId: null, apiKey: null };
 

@@ -5,7 +5,7 @@ import { resolveUserAndKey } from './_lib/userKey.js';
 
 export const config = { maxDuration: 60 };
 
-const MODEL_NAME = 'gemini-3-pro-image-preview';
+const MODEL_NAME = 'gemini-3.1-flash-image';
 const MAX_REFERENCE_IMAGES = 10;
 const MAX_PROMPT_LENGTH = 2000;
 
@@ -33,15 +33,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Invalid reference images.' });
   }
 
+  // console.log("[generate] Valid parameters passed. ", );
+
   // Never trust a client-supplied key; look up the caller's own key (if any) server-side.
   const { userId, apiKey: ownApiKey } = IS_DEV
     ? { userId: null, apiKey: null }
     : await resolveUserAndKey(req);
 
+  // console.log("[generate] Got okay user and key? ", );
+
   const key = IS_DEV ? process.env.GEMINI_API_KEY : ownApiKey || process.env.GEMINI_API_KEY;
   if (!key) {
     return res.status(500).json({ error: 'Server API key is not configured.' });
   }
+
+  // /console.log("[generate] Got okay user and key... ", );
 
   // Fail closed: if the limiter store is down, don't spend on Gemini.
   // null = BYOK, not subject to the shared free-quota.
