@@ -1,4 +1,5 @@
 import React from 'react';
+import paradiseUrl from '../assets/img/paradise.png';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -31,7 +32,8 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
         </p>
         <p className="text-sm text-arena-text-muted dark:text-arena-dark-text-muted leading-relaxed text-left">
           A project by {' '}
-          <a href="https://concourse.codes" target="_blank" rel="noreferrer" className="underline hover:text-green-900" >
+          <a href="https://concourse.codes" target="_blank" rel="noreferrer" className="underline hover:text-green-900 inline-flex items-center gap-1 align-bottom" >
+            <img src={paradiseUrl} alt="" className="w-4 h-4 inline" />
             Concourse Codes
           </a>. {' '}
         </p>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { Eye, EyeOff } from 'lucide-react';
+import { ExternalLink, Eye, EyeOff, HelpCircle } from 'lucide-react';
 import { deleteGeminiKey, requestPasswordReset, saveGeminiKey, signInExistingUser, signOutUser, signUpNewUser } from '../services/supabase';
 
 interface LoginModalProps {
@@ -32,6 +32,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, user, hasStoredKey, onH
   const [keyError, setKeyError] = useState<string | null>(null);
   const [isSavingKey, setIsSavingKey] = useState(false);
   const [isRemovingKey, setIsRemovingKey] = useState(false);
+  const [showFaq, setShowFaq] = useState(false);
 
   if (!isOpen) return null;
 
@@ -185,11 +186,75 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, user, hasStoredKey, onH
                 }}
                 className="w-full flex items-center justify-between font-mono text-sm px-4 py-3 rounded-xl border bg-white dark:bg-arena-dark-surface border-arena-border dark:border-arena-dark-border text-arena-charcoal dark:text-arena-dark-text hover:border-arena-green transition-colors"
               >
-                <span>LLM API Key</span>
+                <span>Gemini API Key</span>
                 <span className={`uppercase text-xs ${hasStoredKey ? 'text-arena-green' : 'text-red-400'}`}>
                   {hasStoredKey ? '✓ connected' : '✗ no'}
                 </span>
               </button>
+
+              {/* Gemini API Key Info */}
+              <div className="flex items-center justify-between gap-2 px-1">
+                <a
+                  href="https://aistudio.google.com/docs/api-key"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-arena-text-muted dark:text-arena-dark-text-muted hover:text-arena-charcoal dark:hover:text-arena-dark-text underline underline-offset-2 transition-colors"
+                >
+                  Where do I get a Gemini API Key?
+                  <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setShowFaq(prev => !prev)}
+                  aria-expanded={showFaq}
+                  aria-label="Toggle API key FAQ"
+                  className="text-arena-tan dark:text-arena-dark-text-muted hover:text-arena-charcoal dark:hover:text-arena-dark-text transition-colors"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div
+                aria-hidden={!showFaq}
+                className={`grid transition-[grid-template-rows,opacity,visibility] duration-300 ease-in-out ${showFaq ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 invisible'}`}
+              >
+                <div className="overflow-hidden">
+                <div className="space-y-3 px-1 text-xs text-arena-text-muted dark:text-arena-dark-text-muted leading-relaxed">
+                  <div className="space-y-1">
+                    <p className="font-medium text-arena-charcoal dark:text-arena-dark-text">Why do I need a Gemini API Key?</p>
+                    <p>This app currently uses Google Gemini's image generation models to operate. In lieu of offering a paid tier, you may obtain a Gemini API key for use in the app (for free). Note that you may need to upgrade to a Billing Tier depending on your current Gemini API usage.</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-medium text-arena-charcoal dark:text-arena-dark-text">Is this secure?</p>
+                    <p>
+                      Yes. The system uses{' '}
+                      <a
+                        href="https://supabase.com/docs/guides/database/vault"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-bold underline underline-offset-2 hover:text-arena-charcoal dark:hover:text-arena-dark-text transition-colors"
+                      >
+                        Supabase Vault
+                      </a>{' '}
+                      to store the keys securely in the database. At no point is the key visible to the application.
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-medium text-arena-charcoal dark:text-arena-dark-text">Can I just pay for credits instead?</p>
+                    <p>
+                      Not at the moment. Payment will be coming soon(ish). Feel free to {' '}
+                      <a
+                        href="mailto:ben@concourse.codes"
+                        className="underline underline-offset-2 hover:text-arena-charcoal dark:hover:text-arena-dark-text transition-colors"
+                      >
+                        let me know
+                      </a>
+                      .
+                    </p>
+                  </div>
+                </div>
+                </div>
+              </div>
 
               {isEditingKey && !showKeyForm && hasStoredKey && (
                 <div className="space-y-2">

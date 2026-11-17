@@ -39,16 +39,22 @@ export async function updatePassword(newPassword: string) {
 }
 
 /* –– BYOK FUNCTIONS ––––––––––––––––––––––––––––––––––––––––––––––––––––––– */
+/** Save a users passed-in API key using a custom function that utilizes Supabase Vault's encryption method.
+ * See Supabase dashboard for more.
+ */
 export async function saveGeminiKey(apiKey: string) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Must be logged in to save a key.');
-  return supabase.from('user_llm_keys').upsert({ user_id: user.id, api_key: apiKey, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+  return supabase.rpc('set_user_llm_key', { p_api_key: apiKey });
 }
 
+export async function updateGeminiKey(apiKey: string) {
+  // implement update key RPC function
+}
+
+/** Delete a user's stored API key using a secure RPC supabase function to remove from Supabase Vault's secure, encrypted storage */
 export async function deleteGeminiKey() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Must be logged in.');
-  return supabase.from('user_llm_keys').delete().eq('user_id', user.id);
+  return supabase.rpc('delete_user_llm_key');
 }
 
 export async function hasGeminiKey(): Promise<boolean> {

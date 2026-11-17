@@ -20,7 +20,6 @@ export const getBearerToken = (req: VercelRequest): string | null => {
 export const resolveUserAndKey = async (
   req: VercelRequest
 ): Promise<{ userId: string | null; apiKey: string | null }> => {
-  // console.log("[userKey] trying to get user key right.... ", );
   const token = getBearerToken(req);
   if (!token) return { userId: null, apiKey: null };
 
@@ -28,10 +27,9 @@ export const resolveUserAndKey = async (
   if (!user) return { userId: null, apiKey: null };
 
   const { data } = await supabaseAdmin
-    .from('user_llm_keys')
-    .select('api_key')
-    .eq('user_id', user.id)
+    .rpc('get_user_llm_key', { p_user_id: user.id })
     .maybeSingle();
 
-  return { userId: user.id, apiKey: data?.api_key ?? null };
+  const apiKey = typeof data === 'string' ? data : null;
+  return { userId: user.id, apiKey };
 };

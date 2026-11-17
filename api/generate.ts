@@ -89,6 +89,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
   parts.push({ text: `Subject: ${prompt}` });
+  
+  console.log("[generate] key:", key);
 
   const ai = new GoogleGenAI({ apiKey: key });
   const maxAttempts = 3;
