@@ -10,23 +10,22 @@ import { extractChannelSlug, getImgBlobSize, urlToBase64 } from './services/util
 import { fetchChannelMetadata, fetchChannelBlocks } from './services/arenaService';
 import { generateStyledImage, fetchQuota } from './services/geminiService';
 import { supabase } from './services/supabase';
-
 // Components
 import ChannelInput from './components/ChannelInput';
 import ImageGrid from './components/ImageGrid';
 import Controls from './components/Controls';
 import OverlayModal, { ModalMode } from './components/OverlayModal';
-import FriendGate from './components/FriendGate';
 import AboutModal from './components/AboutModal';
 import { AlertCircle, Moon, Sun, Shield } from 'lucide-react';
 import { useLocalStorage } from './services/useLocalStorage';
 import { trackEvent } from './services/analytics';
 import { hasGeminiKey } from './services/supabase';
 import LoginModal from './components/LoginModal';
+// Assets
+import paradiseUrl from './assets/img/paradise.png';
 
+// Constants
 const SELECTION_LIMIT = 10;
-// In a real prod environment, this would be validated on a backend.
-const SHARED_FRIEND_CODE = 'arena'; 
 
 interface HeaderProps {
   channelTitle?: string;
@@ -90,7 +89,7 @@ const Header: React.FC<HeaderProps> = ({
 );
 
 const App: React.FC = () => {
-  const [state, setState] = useState<AppState>(AppState.UNAUTHENTICATED);
+  const [state, setState] = useState<AppState>(AppState.IDLE);
   const [isDark, setIsDark] = useLocalStorage<boolean>('arena-dark-theme', true); 
 
   const [channel, setChannel] = useState<ArenaChannel | null>(null);
@@ -145,13 +144,6 @@ const App: React.FC = () => {
 
   /** Check for existing session and handle dark mode */
   useEffect(() => {
-    // TODO: eventually remove all friend gate logic
-    // Check for existing session
-    const savedCode = localStorage.getItem('arena_friend_code');
-    if (savedCode === SHARED_FRIEND_CODE) {
-      setState(AppState.IDLE);
-    }
-
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
@@ -174,17 +166,6 @@ const App: React.FC = () => {
     }
   };
 
-  /** handle friend-gate unlock */
-  const handleUnlock = (code: string) => {
-    if (code === SHARED_FRIEND_CODE) {
-      localStorage.setItem('arena_friend_code', code);
-      setAuthError(false);
-      setState(AppState.IDLE);
-    } else {
-      setAuthError(true);
-    }
-  };
-
   /***** MISC. HANDLER FUNCS *********************************************** */
   /***************************************************************************/
 
@@ -197,11 +178,6 @@ const App: React.FC = () => {
   };
 
   const modalMode = getModalMode();
-
-  // Removing friend gate but leaving deprecated during cloud infra migration (oct. 9, 2026)
-  // if (state === AppState.UNAUTHENTICATED) {
-  //   return <FriendGate onUnlock={handleUnlock} isError={authError} />;
-  // }
 
   /***** ARENA FUNCS *********************************************** */
   /*******************************************************************/
@@ -471,9 +447,9 @@ const App: React.FC = () => {
         }}
         aria-label="About"
         title="About"
-        className="fixed bottom-6 right-6 z-40 w-9 h-9 rounded-full border flex items-center justify-center text-sm font-mono transition-colors bg-arena-cream border-arena-border text-arena-charcoal hover:text-arena-green dark:bg-arena-dark-bg dark:border-arena-dark-border dark:text-arena-dark-text"
+        className="fixed bottom-6 right-6 z-40 w-9 h-9 rounded-full border flex items-center justify-center text-sm font-mono transition-colors bg-arena-cream border-arena-border text-arena-charcoal cursor-pointer hover:bg-arena-green/20 dark:bg-arena-dark-bg dark:border-arena-dark-border dark:text-arena-dark-text"
       >
-        ?
+        <img src={paradiseUrl} alt="" className="w-4 h-4 inline" />
       </button>
 
       <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />

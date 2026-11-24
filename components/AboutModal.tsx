@@ -20,7 +20,11 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
         aria-labelledby="about-title"
         className="w-full max-w-md bg-arena-cream dark:bg-arena-dark-bg border border-arena-border dark:border-arena-dark-border rounded-2xl shadow-2xl p-8 space-y-4 text-center animate-in zoom-in-95 duration-200"
       >
-        <h2 id="about-title" className="text-2xl font-light text-arena-charcoal dark:text-arena-dark-text">About</h2>
+        <div className="flex gap-2 justify-center align-center">
+          <h2 id="about-title" className="text-2xl font-light text-arena-charcoal dark:text-arena-dark-text">
+            About
+          </h2>
+        </div>
         <p className="text-sm text-arena-text-muted dark:text-arena-dark-text-muted leading-relaxed text-left">
           The Are.na style synthesizer is a hobby project exploring fine-tuning capabilites of Google's Nano Banana image generation LLM.
         </p>
